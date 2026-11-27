@@ -1,0 +1,18 @@
+# One service, one container: Next.js + Node API inside the same image (see Dockerfile).
+services:
+  app:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+    image: reading-challenge-tracker:latest
+    container_name: reading-challenge
+    ports:
+      - "3000:3000"
+    volumes:
+      - reading-data:/data
+    restart: unless-stopped
+    stop_grace_period: 15s
+
+volumes:
+  reading-data:
