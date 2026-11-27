@@ -55,3 +55,16 @@ jest.mock("expo-router/native-tabs", () => {
   return { NativeTabs };
 });
 
+
+jest.mock("expo-haptics", () => ({
+  selectionAsync: jest.fn(() => Promise.resolve()),
+  impactAsync: jest.fn(() => Promise.resolve()),
+  notificationAsync: jest.fn(() => Promise.resolve()),
+  ImpactFeedbackStyle: { Light: "light" },
+  NotificationFeedbackType: { Success: "success" },
+}));
+jest.mock("react-native-svg", () => {
+  const { View, Text } = jest.requireActual("react-native");
+  const Svg = (props: object) => <View {...props} />;
+  return { __esModule: true, default: Svg, Svg, Path: () => null, Rect: () => null, Text: ({ children }: { children: React.ReactNode }) => <Text>{children}</Text> };
+});

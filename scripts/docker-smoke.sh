@@ -56,6 +56,10 @@ code=$(curl -s -o /dev/null -w '%{http_code}' -X PATCH "$BASE/api/books/matilda"
 [ "$code" = 400 ] && pass "string status → 400" || fail "string status gave $code"
 curl -sf -X PUT "$BASE/api/video-progress" -H 'content-type: application/json' -d '{"positionSeconds":12.3}' >/dev/null
 pass "saved video position 12.3 s"
+[ "$(curl -sf "$BASE/api/library" | python3 -c 'import json,sys;print(len(json.load(sys.stdin)["books"]))')" = 10 ] && pass "library lists 10 books" || fail "library"
+curl -sf "$BASE/api/books/the-secret-garden/pages/1" | grep -q '"chapterTitle":"Chapter I' && pass "public-domain reader text is in the image" || fail "reader content missing"
+curl -sf "$BASE/api/books/the-secret-garden/details" | grep -q 'contentNote":null' && pass "no local override text in the image" || fail "a local override leaked into the image"
+curl -sf -X PUT "$BASE/api/books/the-secret-garden/progress" -H 'content-type: application/json' -d '{"page":5,"secondsDelta":30,"day":"2026-11-27"}' | grep -q '"currentPage":5' && pass "saved reading progress: page 5"
 
 start=$(date +%s)
 docker stop -t 15 "$NAME" >/dev/null
@@ -76,6 +80,7 @@ assert [b for b in d["fiction"]["books"] if b["id"]=="matilda"][0]["read"] is Tr
 ' && pass "book status survived: Fiction 1 of 3, Nonfiction 0 of 3"
 curl -sf "$BASE/api/video-progress" | grep -q '"positionSeconds":12.3' && pass "video position survived: 12.3 s" || fail "video position lost"
 curl -sf "$BASE/api/rewards" | grep -q '"id":"challenge-tote"' && pass "rewards endpoint served through the public port" || fail "rewards endpoint"
+curl -sf "$BASE/api/books/the-secret-garden/details" | grep -q '"currentPage":5' && pass "reading progress survived: page 5" || fail "reading progress lost"
 
 html=$(curl -sf "$BASE/")
 echo "$html" | grep -q '<title>Your reading challenge · Lantern Lane Library</title>' && pass "page renders with title"

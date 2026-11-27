@@ -11,7 +11,8 @@ Extras on top of the assignment:
 - **Library rewards and offer**: a bookmark for each finished list, a free tote bag with a claim code for finishing both, and a "late fees waived" deadline banner. Rewards are derived from saved progress by one shared function used by the API (`GET /api/rewards`), the web app and Expo. The offer is labelled as a demo from a fictional library.
 - **Light and dark mode** on web and mobile: follows the system by default, with a remembered System / Light / Dark choice. The web app applies it before first paint, so there is no flash.
 - **Glass surfaces**: translucent, blurred cards and a floating glass header over soft colour bubbles on web; Apple's Liquid Glass (`expo-glass-effect`) on iOS 26 with blur and solid fallbacks elsewhere. All fall back to solid surfaces under *Reduce transparency* or *Increase contrast*.
-- **Mobile navigation**: native splash screen, a three-slide intro shown once (with Skip), and a system bottom tab bar (Challenge · Video · Rewards) that uses Liquid Glass on iOS 26.
+- **Mobile navigation**: native splash screen, a three-slide intro shown once (with Skip), and a system bottom tab bar (Challenge · Library · Video · Rewards) that uses Liquid Glass on iOS 26.
+- **Reading experience** on web and mobile: see [Reading experience](#reading-experience).
 
 ## Quick start (one command)
 
@@ -37,6 +38,41 @@ Open **http://localhost:3000**. The first build takes about 2 minutes. Data pers
    npm run mobile
    ```
    Press `i` for the iOS simulator or `a` for the Android emulator, or scan the QR code with Expo Go on a phone. On first launch, tap **Skip** on the intro. The Challenge tab shows Fiction **1 of 3** with Matilda read, and the Video tab offers to resume at 0:12. Toggle a book in Expo and refresh the web page: the change is there too. See [Expo and the API URL](#expo-and-the-api-url) if the app can't reach the backend.
+
+6. **Read a book.** Open **My Library** in the web header, choose *The Secret Garden*, press **Start reading** and turn two pages. On the phone, open the **Library** tab: *Continue reading* shows the same page, and the reader opens there with the same settings.
+
+## Reading experience
+
+Everything below works the same on web (`/library`, `/books/:id`, `/books/:id/read`) and mobile (Library tab → book → reader). Both clients use one API client (`packages/shared/src/client.ts`) and the same pure logic (`packages/shared/src/reading.ts`). All reading state lives on the server, so you can start on one device and continue on the other.
+
+| Feature | Web | Mobile |
+| --- | --- | --- |
+| Library: covers, title, author, category, summary, status badge, % + progress bar | ✓ | ✓ |
+| Filters (All / Not Started / Currently Reading / Completed) with counts, and search (title/author/category; ignores case and accents) | ✓ | ✓ |
+| Stats (total, reading, completed, pages read, reading time), daily or weekly goal, streak | ✓ | ✓ |
+| Continue Reading and Recently Read rows | ✓ | ✓ |
+| Details: cover, metadata, description, chapters, progress, time read, last read | ✓ | ✓ |
+| Start / Continue / Read again; manual "I'm on page __" for books that can't be read in the app | ✓ | ✓ |
+| Mark as Read with confirmation, Mark as unread, Reset progress with confirmation (bookmarks, highlights and notes are kept) | ✓ (`<dialog>`) | ✓ (native alert) |
+| Reader: Previous/Next, page X of Y, progress bar, chapter titles | ✓ + ← / → keys + swipe | ✓ + swipe |
+| Settings: font size, font style (serif/sans/mono), Light/Dark/Sepia, line spacing, alignment, background tint; saved per reader | ✓ | ✓ |
+| Bookmarks, paragraph highlights in 4 colours with notes, book notes, jump to page | ✓ (click) | ✓ (long-press) |
+| Automatic progress: resume page, Not Started → Currently Reading → Completed at the last page, "You finished …" dialog | ✓ | ✓ + haptics |
+| Reading-time tracking: only while visible and active (2-minute idle cut-off), saved every 15 s, max 60 s per save | ✓ | ✓ (`AppState`) |
+
+**What can be read in the app**
+- Only public-domain texts are bundled: *The Secret Garden* and *The Story of My Life* (challenge books), plus *Alice's Adventures in Wonderland*, *The Wind in the Willows*, *Peter Pan* and *Walden* in My Library.
+- *The Hobbit*, *Matilda*, *A Brief History of Time* and *The Diary of a Young Girl* are still in copyright. They get details, notes and bookmarks, and manual page tracking against a typical print page count (shown with "~").
+- Pages are fixed on the server (about 1,800 characters, cut at paragraph boundaries), so page numbers, bookmarks and highlights match on every device and font size.
+- "Completed" is the same flag as the challenge checkbox. Finishing *The Secret Garden* in the reader ticks it in the Fiction list and counts toward rewards.
+
+**Local demo text (optional, private).** To read a PDF you own in the app, for example while testing:
+
+```bash
+npx tsx scripts/import-local-book.mts "/path/to/book.pdf" --title "Title" --author "Author"
+```
+
+While `apps/api/content/local/override.json` exists, every book opens that text, and the UI says so. The file is git-ignored and Docker-ignored, so copyrighted text is never committed or shipped. Delete the folder to go back to the public-domain texts. Tests and E2E always ignore it (`CONTENT_OVERRIDE=""`).
 
 ## Prerequisites
 
@@ -98,12 +134,30 @@ npm run check:contrast # WCAG contrast for light, dark and text-on-glass
 
 | Suite | Where | What it covers |
 | --- | --- | --- |
-| Shared (Vitest, 17) | `packages/shared/src/*.test.ts` | Save state machine: pending keeps the confirmed value, duplicate in-flight saves are ignored, row and count update together, failures are retryable, and a save that completes a list announces the reward. Schema rejects `null`, `0`, `1`, `"false"` and extra keys. Rewards: thresholds, a stable claim code, no tote unless both lists are present, the offer's day count and ended state. |
-| API integration (Vitest, 30) | `apps/api/test/*.test.ts` | Runs `fastify.inject` against a **temporary SQLite file per test**. Fresh DB: 2 lists, 3 unread books each, 0 of 3. Read/unread, a repeated identical PATCH, independent counts, 404 for an unknown ID, 400 for missing/`null`/`0`/`1`/`"false"`/`"true"`/array/extra keys/malformed JSON, the error shape, `no-store`, restart persistence, seeding never overwriting saved data, video progress including seeking backward and invalid values, and `GET /api/rewards` (all locked on a fresh DB, Fiction-only unlock, the tote claim code, re-locking after un-reading). |
-| Web components (Vitest + Testing Library, 15) | `apps/web/test/*.test.tsx` | Loading state; initial load failure and Retry; saving keeps the confirmed value and count; duplicate clicks; other books stay usable; failure message and Retry; keyboard Space; video resume applied only after both metadata and fetch, never saving 0; saving on pause, including after seeking backward; save failure and retry; load vs playback failure; the theme toggle (radio group, arrow keys, `data-theme`, remembered choice); the offer banner with a fixed clock (days left and ended); a reward unlock and its announcement. |
-| Expo (jest-expo + RNTL, 14) | `apps/mobile/__tests__` | The same list behaviours on React Native with accessibility roles and states (checkbox, checked, busy); video resume without autoplay; saving on pause and rewind; save, load and playback failures; lists still usable when the video fails. Also: reward unlock and announcement, the offer banner, the appearance setting saved to storage, and the **real expo-router tree**: the intro on first launch, Skip, Next → Get started, and no intro once seen. |
-| E2E (Playwright, 35 + 1 skipped) | `e2e/*.spec.ts` | Real production build and real API on a fresh temp DB per test. Fresh 0 of 3; Matilda read, refresh, unread; keyboard-only with a visible focus ring; failed save via a routed 500 and Retry; load failure and recovery; **an actual API process restart**; a cross-client update through the API (the path Expo uses); **play, seek to 12 s, pause, refresh, Play resumes near 12 s**; seeking backward; video load, playback and save failures; desktop side-by-side and Pixel 7 stacked layout; touch targets; accessible names; reduced motion (0 s transitions); 150–220 ms default motion; rendered SEO tags; OG image size and type; robots and sitemap; PDF download (`%PDF-`); system dark mode; a manual theme choice surviving a reload even with JavaScript blocked (no flash); backdrop blur on the glass header and cards, with a sticky header; the offer banner; Fiction completion unlocking the bookmark; and all six books unlocking the tote with the same claim code as `GET /api/rewards`. The skipped test is the desktop-only layout check in the mobile project. |
-| Docker smoke | `scripts/docker-smoke.sh` | Builds the image, runs one container, saves Matilda and 12.3 s, stops it (SIGTERM exit 0), **removes it, starts a new container on the same volume**, and checks both values plus `/api/rewards`, the HTML, OG image, robots, sitemap, PDF, video range requests and `no-store`. |
+| Shared (Vitest, 26) | `packages/shared/src/*.test.ts` | Save state machine: pending keeps the confirmed value, duplicate in-flight saves are ignored, row and count update together, failures are retryable, and a save that completes a list announces the reward. Schema rejects `null`, `0`, `1`, `"false"` and extra keys. Rewards: thresholds, a stable claim code, no tote unless both lists are present, the offer's day count and ended state. Reading: status derivation, percentages, filtering and search, streaks across gaps and month ends, daily and weekly goals, date/duration formatting, preference validation. |
+| API integration (Vitest, 47) | `apps/api/test/*.test.ts` | Runs `fastify.inject` against a **temporary SQLite file per test**. Fresh DB: 2 lists, 3 unread books each, 0 of 3. Read/unread, a repeated identical PATCH, independent counts, 404 for an unknown ID, 400 for missing/`null`/`0`/`1`/`"false"`/`"true"`/array/extra keys/malformed JSON, the error shape, `no-store`, restart persistence, seeding never overwriting saved data, video progress including seeking backward and invalid values, and `GET /api/rewards` (all locked on a fresh DB, Fiction-only unlock, the tote claim code, re-locking after un-reading).
+Reading:
+- library (10 books, `/api/books` still 6) and pages (range, 409 for copyrighted)
+- progress (status transitions, resume page, the 60 s cap, last page → Completed, re-reading)
+- Mark as Read + reset keeping notes and bookmarks
+- bookmark, highlight and note CRUD, with validation and 404s
+- preferences, and stats (streak, goal, Continue/Recent order)
+- the **v1 → v2 migration of an existing database**, and the local override
+- pagination |
+| Web components (Vitest + Testing Library, 23) | `apps/web/test/*.test.tsx` | Loading state; initial load failure and Retry; saving keeps the confirmed value and count; duplicate clicks; other books stay usable; failure message and Retry; keyboard Space; video resume applied only after both metadata and fetch, never saving 0; saving on pause, including after seeking backward; save failure and retry; load vs playback failure; the theme toggle (radio group, arrow keys, `data-theme`, remembered choice); the offer banner with a fixed clock (days left and ended); a reward unlock and its announcement. Reading: library filters, search, empty and error states; Mark as Read confirm and cancel; reset confirm; manual page tracking; the reader resuming, paging with buttons and arrow keys, saving progress, changing settings, bookmarking, highlighting with a note. |
+| Expo (jest-expo + RNTL, 17) | `apps/mobile/__tests__` | The same list behaviours on React Native with accessibility roles and states (checkbox, checked, busy); video resume without autoplay; saving on pause and rewind; save, load and playback failures; lists still usable when the video fails. Also: reward unlock and announcement, the offer banner, the appearance setting saved to storage, and the **real expo-router tree**: the intro on first launch, Skip, Next → Get started, and no intro once seen. Reading: Library stats, filters and search; details Mark as Read via the native alert; the reader resuming on the saved page, turning pages, saving progress and settings, and long-press highlighting. |
+| E2E (Playwright, 45 + 1 skipped) | `e2e/*.spec.ts` | Real production build and real API on a fresh temp DB per test. Fresh 0 of 3; Matilda read, refresh, unread; keyboard-only with a visible focus ring; failed save via a routed 500 and Retry; load failure and recovery; **an actual API process restart**; a cross-client update through the API (the path Expo uses); **play, seek to 12 s, pause, refresh, Play resumes near 12 s**; seeking backward; video load, playback and save failures; desktop side-by-side and Pixel 7 stacked layout; touch targets; accessible names; reduced motion (0 s transitions); 150–220 ms default motion; rendered SEO tags; OG image size and type; robots and sitemap; PDF download (`%PDF-`); system dark mode; a manual theme choice surviving a reload even with JavaScript blocked (no flash); backdrop blur on the glass header and cards, with a sticky header; the offer banner; Fiction completion unlocking the bookmark; and all six books unlocking the tote with the same claim code as `GET /api/rewards`.
+Reading:
+- library search and filters
+- read two pages → refresh → **Continue reading resumes on page 3**
+- keyboard paging; settings persisting after a reload and in the API
+- bookmark + highlight + note visible after a reload
+- **finishing the last page completes the book and ticks the challenge**
+- Mark as Read with confirmation, then reset; manual page tracking
+- progress made through the API (the Expo path) showing on the web
+
+The skipped test is the desktop-only layout check in the mobile project. |
+| Docker smoke | `scripts/docker-smoke.sh` | Builds the image, runs one container, saves Matilda and 12.3 s, stops it (SIGTERM exit 0), **removes it, starts a new container on the same volume**, and checks both values, reading progress and the bundled public-domain texts (and that no local override text is in the image) plus `/api/rewards`, the HTML, OG image, robots, sitemap, PDF, video range requests and `no-store`. |
 
 The E2E suite plays the app's own local clip, so it never depends on a third-party media host. Chromium uses the WebM source, and Safari and iOS use the MP4.
 
@@ -118,6 +172,16 @@ All responses are JSON with `Cache-Control: no-store`. Errors always look like `
 | `PATCH /api/books/:id` | `{"read": true}` or `{"read": false}` | `{"book":{…},"list":{"id","title","readCount","total"},"message":"Matilda marked as read. Fiction: 1 of 3 read."}` | 404 `BOOK_NOT_FOUND`; 400 `INVALID_STATUS` (missing, `null`, `0`, `1`, `"false"`, other keys); 400 `INVALID_JSON` |
 | `GET /api/video-progress` | — | `{"positionSeconds":12.4,"updatedAt":"…"}` (0 and `null` when nothing is saved) | — |
 | `PUT /api/video-progress` | `{"positionSeconds": 12.4}` (a finite number from 0 to 21600) | The saved value | 400 `INVALID_POSITION` |
+| `GET /api/library` | — | `{"books":[{id,title,author,category,year,summary,description,listId,readable,pagesApprox,contentNote,cover,progress:{status,currentPage,furthestPage,totalPages,percent,secondsRead,startedAt,lastReadAt,completedAt}}]}` | — |
+| `GET /api/books/:id/details` | — | `{book, chapters:[{title,startPage}], counts:{bookmarks,highlights,notes}}` | 404 `NOT_FOUND` |
+| `GET /api/books/:id/pages/:n` | — | `{bookId,page,totalPages,chapterTitle,paragraphs}` | 404 `PAGE_OUT_OF_RANGE`; 409 `NOT_READABLE` |
+| `PUT /api/books/:id/progress` | `{"page":12,"secondsDelta":15,"day":"2026-11-27"}` | `{progress, justCompleted}` (the last page completes the book) | 400 `INVALID_BODY`; 404 |
+| `DELETE /api/books/:id/progress` | — | `{progress}`: back to Not Started (bookmarks, highlights and notes kept) | 404 |
+| `GET/POST /api/books/:id/bookmarks`, `DELETE /api/bookmarks/:id` | `{"page":4,"label?":"…"}` | bookmark(s) | 400, 404 |
+| `GET/POST /api/books/:id/highlights`, `PATCH/DELETE /api/highlights/:id` | `{"page":4,"paragraph":0,"color":"yellow|green|blue|pink","note?":"…"}` | highlight(s) with excerpt | 400, 404, 409 |
+| `GET/POST /api/books/:id/notes`, `PATCH/DELETE /api/notes/:id` | `{"text":"…","page?":4}` | note(s) | 400, 404 |
+| `GET/PUT /api/reader/preferences` | `{fontSize,fontFamily,theme,lineSpacing,align,background,goal:{period,minutes}}` | preferences | 400 |
+| `GET /api/reading/stats?today=YYYY-MM-DD` | — | `{totalBooks,reading,completed,notStarted,pagesRead,secondsRead,streak,goal,continueReading,recentlyRead}` | 400 |
 | `GET /api/rewards` | — | `{"rewards":[{"id":"fiction-bookmark","title","description","current":3,"total":3,"unlocked":true,"claimCode":null}, …, {"id":"challenge-tote",…,"claimCode":"LANTERN-XXXX"}],"offer":{"endsAt":"2027-01-31T23:59:59Z","daysLeft":66,"ended":false}}` | — |
 
 PATCH is idempotent: sending the same status twice returns the same status and count and doesn't change `updatedAt`. An unknown ID returns 404 before the body is validated.
@@ -211,10 +275,10 @@ After deploying, check on the live URL that a book toggle survives a refresh and
 
 **Automated checks that ran and passed** (Node 25.2, macOS, Docker 29):
 - `npm run lint`, `npm run typecheck` and `npm run build`
-- `npm test`: 17 shared + 30 API + 15 web + 14 Expo = 76 tests
-- `npm run test:e2e`: 35 passed and 1 skipped by design, on desktop Chrome and Pixel 7 profiles
+- `npm test`: 26 shared + 47 API + 23 web + 17 Expo = 113 tests
+- `npm run test:e2e`: 45 passed and 1 skipped by design, on desktop Chrome and Pixel 7 profiles
 - `npm run docker:smoke`: all checks passed, including persistence after `docker rm` and recreation on the same volume
-- `npm run check:contrast`: all 70 pairs pass across the light and dark palettes, including body, muted and mango text on glass over the brightest background bubble. Text is at least 4.5:1; UI parts, focus and the progress fill are at least 3:1.
+- `npm run check:contrast`: all 106 pairs pass across the light and dark palettes and the Light/Dark/Sepia reader themes (on every background tint), including body, muted and mango text on glass over the brightest background bubble. Text is at least 4.5:1; UI parts, focus and the progress fill are at least 3:1.
 
 **Manual checks performed:**
 - In a browser against the dev server: marked Matilda read, refreshed and saw 1 of 3 / 0 of 3; played, sought to 12.7 s, paused, refreshed, pressed Play, and playback continued from 12.7 s.
@@ -226,6 +290,11 @@ After deploying, check on the live URL that a book toggle survives a refresh and
   - Switching the simulator to dark mode re-themed the app. Choosing *Light* in Settings overrode the dark system setting.
   - After a relaunch, there was no intro and Light was still selected.
 - **New web features in the browser:** System mode followed a dark OS theme; the toggle switched to Light; the glass header stayed sticky while scrolling; finishing Fiction unlocked the bookmark and the live region announced it, and `/api/rewards` agreed.
+
+- **Reading, web ⇄ iOS simulator** against `npm run dev`, with the local demo text loaded:
+  - On the web: opened Walden, turned pages, switched to Sepia at 20 px, and highlighted a paragraph in green with a note.
+  - In Expo Go: the Library tab showed Walden under Continue reading at page 5 with the same stats and streak. The reader opened on page 5 in Sepia at 20 px with the green highlight and its note marker.
+  - On the phone: Next saved page 6, and a long-press blue highlight reached the backend next to the web one.
 
 **Not verified here:**
 - A physical phone and the Android emulator, which need a device. On Android, the glass cards are translucent tinted surfaces rather than real blur, and that path hasn't been seen on a device.
@@ -248,5 +317,7 @@ This project was built with an AI coding assistant (Claude). It helped with the 
 - `node:sqlite` still prints an ExperimentalWarning on Node 22–25. The container suppresses it.
 - `npm audit` reports 22 moderate advisories, all in development tooling (Jest, `jest-expo` and Expo CLI's `@expo/fingerprint`, through `glob`/`minimatch`). None are in the Docker image's dependencies, and the suggested "fix" downgrades Expo.
 - The offer and rewards are a demo: the deadline is a constant in `packages/shared/src/rewards.ts`, and claim codes are deterministic per reader. Nobody verifies a code at a front desk.
+- Copyrighted books are tracked, not readable. Their page totals are typical print editions ("~"). Highlights are paragraph-level, not word-level, so they behave the same on web and mobile.
+- Reading time only counts while the reader is visible and touched or scrolled within the last 2 minutes. Streaks and goals use the device's local date, sent with each save.
 - Liquid Glass needs iOS 26. Earlier iOS versions get a system blur, and *Reduce transparency* gets solid cards.
 - The fonts are fetched from Google Fonts at build time (`next/font`), so `docker build` needs network access.

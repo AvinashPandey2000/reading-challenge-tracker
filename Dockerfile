@@ -68,6 +68,8 @@ COPY --from=build --chown=node:node /repo/packages/shared/package.json ./api/pac
 COPY --from=build --chown=node:node /repo/packages/shared/dist ./api/packages/shared/dist
 COPY --from=build --chown=node:node /repo/apps/api/package.json ./api/apps/api/package.json
 COPY --from=build --chown=node:node /repo/apps/api/dist ./api/apps/api/dist
+# Public-domain reader texts (a local override in apps/api/content/local is docker-ignored)
+COPY --from=build --chown=node:node /repo/apps/api/content ./api/apps/api/content
 
 COPY --chown=node:node docker/start.mjs ./start.mjs
 

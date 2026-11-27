@@ -70,6 +70,23 @@ for (const [name, C] of Object.entries(PALETTES)) {
     console.log(`${ok ? "PASS" : "FAIL"}  ${r.toFixed(2).padStart(5)}:1  (min ${min})  ${label}`);
   }
 }
+// Reader themes (packages/shared/src/reading.ts READER_PALETTE / READER_BACKGROUNDS), same on web and Expo.
+const READER = {
+  light: { background: "#FFFDF8", text: "#1D1B16", muted: "#5B5346", accent: "#A35400", tints: ["#FAF7F0", "#EEF3EA", "#EEF1F5"] },
+  dark: { background: "#15130F", text: "#EDE6D8", muted: "#B9AE9C", accent: "#F2A541", tints: ["#1E1B16", "#172019", "#151A21"] },
+  sepia: { background: "#F4E9D3", text: "#3B2F20", muted: "#6B5A43", accent: "#8A4A00", tints: ["#F1E4CB", "#E9E6CF", "#EDE3D2"] },
+};
+for (const [name, R] of Object.entries(READER)) {
+  console.log(`\nREADER ${name.toUpperCase()}`);
+  for (const bg of [R.background, ...R.tints]) {
+    for (const [label, fg, min] of [["Body text", R.text, 4.5], ["Chapter / page label", R.muted, 4.5], ["Accent (note mark, bookmark)", R.accent, 3]]) {
+      const r = ratio(fg, bg);
+      const ok = r >= min;
+      if (!ok) failed++;
+      console.log(`${ok ? "PASS" : "FAIL"}  ${r.toFixed(2).padStart(5)}:1  (min ${min})  ${label} on ${bg}`);
+    }
+  }
+}
 if (failed) {
   console.error(`\n${failed} contrast check(s) failed`);
   process.exit(1);

@@ -17,7 +17,8 @@ class ApiServer {
 
   async start() {
     this.proc = spawn(process.execPath, ["--no-warnings", serverEntry], {
-      env: { ...process.env, API_PORT: String(API_PORT), API_HOST: "127.0.0.1", DATABASE_PATH: this.dbPath, LOG_LEVEL: "warn" },
+      // CONTENT_OVERRIDE="" → always the committed public-domain texts, never a local override on this machine.
+      env: { ...process.env, API_PORT: String(API_PORT), API_HOST: "127.0.0.1", DATABASE_PATH: this.dbPath, LOG_LEVEL: "warn", CONTENT_OVERRIDE: "" },
       stdio: ["ignore", "inherit", "inherit"],
     });
     const deadline = Date.now() + 10_000;

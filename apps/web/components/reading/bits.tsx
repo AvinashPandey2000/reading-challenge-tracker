@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useId, useRef } from "react";
 import { STATUS_LABEL, type ReadingStatus } from "@rct/shared";
 import styles from "./reading.module.css";
 
@@ -58,6 +58,7 @@ export function ConfirmDialog({
   tone?: "default" | "danger";
 }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
   useEffect(() => {
     const d = ref.current;
     if (!d) return;
@@ -71,8 +72,8 @@ export function ConfirmDialog({
     }
   }, [open]);
   return (
-    <dialog ref={ref} className={`glass ${styles.dialog}`} aria-labelledby="confirm-title" onCancel={(e) => (e.preventDefault(), onCancel())}>
-      <h2 id="confirm-title" className={styles.dialogTitle}>
+    <dialog ref={ref} className={`glass ${styles.dialog}`} aria-labelledby={titleId} onCancel={(e) => (e.preventDefault(), onCancel())}>
+      <h2 id={titleId} className={styles.dialogTitle}>
         {title}
       </h2>
       <p className={styles.dialogBody}>{body}</p>
