@@ -10,8 +10,12 @@ export default function TabsLayout() {
   return (
     <NativeTabs tintColor={colors.mangoStrong} minimizeBehavior="onScrollDown">
       <NativeTabs.Trigger name="index">
-        <NativeTabs.Trigger.Icon sf={{ default: "books.vertical", selected: "books.vertical.fill" }} md="menu_book" />
+        <NativeTabs.Trigger.Icon sf={{ default: "checklist", selected: "checklist" }} md="checklist" />
         <NativeTabs.Trigger.Label>Challenge</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="library">
+        <NativeTabs.Trigger.Icon sf={{ default: "books.vertical", selected: "books.vertical.fill" }} md="menu_book" />
+        <NativeTabs.Trigger.Label>Library</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="video">
         <NativeTabs.Trigger.Icon sf={{ default: "play.rectangle", selected: "play.rectangle.fill" }} md="smart_display" />

@@ -30,6 +30,8 @@ function RootStack() {
         </Stack.Protected>
         <Stack.Protected guard={!!onboarded}>
           <Stack.Screen name="(tabs)" options={{ animation: "fade" }} />
+          <Stack.Screen name="book/[id]" />
+          <Stack.Screen name="read/[id]" options={{ animation: "slide_from_bottom", gestureEnabled: true }} />
         </Stack.Protected>
       </Stack>
     </>

@@ -47,5 +47,5 @@ export function useLibrary() {
     [state],
   );
 
-  return { state, retry, saveGoal };
+  return { state, retry, refresh: load, saveGoal };
 }
