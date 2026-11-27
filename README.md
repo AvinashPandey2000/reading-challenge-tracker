@@ -2,6 +2,8 @@
 
 A small full-stack app for the **Lantern Lane Library** (a fictional library) reading challenge. One demo reader tracks two lists of three books, marks each as read or unread, and resumes a welcome video where they paused it.
 
+**Live demo (web):** https://reading-challenge-tracker-1vp9.onrender.com — Render free plan, so the first request after ~15 idle minutes takes up to a minute, and the demo data resets on each redeploy.
+
 - **Web**: Next.js 16 (App Router), responsive, accessible, with SEO metadata
 - **API**: Node.js 24 + Fastify 5, with SQLite through the built-in `node:sqlite`
 - **Mobile**: Expo SDK 58 (React Native 0.88) for iOS and Android, using the same backend and the same demo reader
@@ -225,13 +227,14 @@ To build for a public URL, pass `--build-arg NEXT_PUBLIC_SITE_URL=https://your-d
 
 ## Publishing and deployment
 
-The repository is set up for GitHub but not yet pushed. No live deployment exists, so no live URL is claimed.
+The code is on GitHub at https://github.com/AvinashPandey2000/reading-challenge-tracker (public).
 
-```bash
-git remote add origin git@github.com:<you>/reading-challenge-tracker.git
-git push -u origin main
-# then add the reviewer under Settings → Collaborators (or make the repository public)
-```
+**Current live deployment — Render (free):** https://reading-challenge-tracker-1vp9.onrender.com
+- Web Service from the public Git repository, runtime **Docker** (the Dockerfile in the repo root), branch `main`, instance type **Free**.
+- Environment variable `NEXT_PUBLIC_SITE_URL=https://reading-challenge-tracker-1vp9.onrender.com` (Render passes it to the Docker build, so the sitemap, robots.txt and canonical URLs use the public address).
+- Render sets `PORT`; the image's Next.js server listens on it and keeps the API on `127.0.0.1:4000` inside the container.
+- Limits of the free plan: the service sleeps after ~15 idle minutes (the next request takes up to a minute), and there is no persistent disk, so the SQLite data resets on every redeploy or restart. The mobile app is not deployed.
+- New commits are not auto-deployed (the service uses the public repository URL rather than a GitHub app connection): use **Manual Deploy → Deploy latest commit** in the Render dashboard.
 
 Live deployment with persistent storage, for example on Fly.io, uses the same Dockerfile:
 
