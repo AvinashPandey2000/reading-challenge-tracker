@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { Pressable } from "react-native";
 import { act, fireEvent, screen, waitFor, within } from "@testing-library/react-native";
 import { ChallengeScreen } from "../src/screens/ChallengeScreen";
 import { VideoScreen } from "../src/screens/VideoScreen";
@@ -145,6 +147,52 @@ describe("WelcomeVideo on mobile", () => {
     expect(screen.getByRole("button", { name: "Play welcome video" })).toBeDisabled();
     await fireEvent.press(screen.getByTestId("toggle-the-hobbit"));
     await waitFor(() => expect(screen.getByTestId("count-fiction")).toHaveTextContent("1 of 3 read"));
+  });
+
+  it("seeks from the seek bar (screen-reader adjust), mutes, and replays from the start after the end", async () => {
+    const { player, puts } = await setup(0);
+    await act(() => player.becomeReady());
+    const seek = screen.getByRole("adjustable", { name: "Seek" });
+    await fireEvent(seek, "accessibilityAction", { nativeEvent: { actionName: "increment" } });
+    expect(player.currentTime).toBe(10);
+    await waitFor(() => expect(puts()).toEqual([10])); // paused seek = new saved place
+
+    await fireEvent.press(screen.getByRole("button", { name: "Mute" }));
+    expect(player.muted).toBe(true);
+    expect(screen.getByRole("button", { name: "Mute" })).toBeSelected();
+
+    await fireEvent.press(screen.getByRole("button", { name: "Play welcome video" }));
+    await waitFor(() => expect(player.play).toHaveBeenCalledTimes(1));
+    player.currentTime = 45;
+    await act(() => {
+      player.emit("playToEnd", undefined);
+      player.pause();
+    });
+    expect(await screen.findByText("Replay")).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole("button", { name: "Play welcome video" }));
+    await waitFor(() => expect(player.play).toHaveBeenCalledTimes(2));
+    expect(player.currentTime).toBe(0);
+  });
+
+  it("pauses when the Video tab is left", async () => {
+    mockFetch({ ...progressRoutes(0) });
+    function Host() {
+      const [active, setActive] = useState(true);
+      return (
+        <>
+          <Pressable accessibilityRole="button" accessibilityLabel="Leave tab" onPress={() => setActive(false)} />
+          <VideoScreen active={active} />
+        </>
+      );
+    }
+    await renderWithProviders(<Host />);
+    const player = players[0] as MockPlayer;
+    await act(() => player.becomeReady());
+    await fireEvent.press(screen.getByRole("button", { name: "Play welcome video" }));
+    await waitFor(() => expect(player.playing).toBe(true));
+    await fireEvent.press(screen.getByRole("button", { name: "Leave tab" }));
+    expect(player.pause).toHaveBeenCalled();
+    expect(player.playing).toBe(false);
   });
 });
 

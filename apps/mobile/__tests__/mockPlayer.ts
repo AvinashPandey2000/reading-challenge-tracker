@@ -7,6 +7,7 @@ export class MockPlayer {
   currentTime = 0;
   duration = 0;
   loop = false;
+  muted = false;
   timeUpdateEventInterval = 0;
   private listeners = new Map<string, Set<Listener>>();
   addListener(event: string, fn: Listener) {

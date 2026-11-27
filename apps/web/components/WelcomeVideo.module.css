@@ -12,6 +12,10 @@
   color: var(--ink-muted);
   font-size: 0.95rem;
 }
+.player {
+  display: grid;
+  gap: 0.6rem;
+}
 .frame {
   position: relative;
   border-radius: var(--radius-sm);
@@ -34,48 +38,212 @@
   height: 100%;
   object-fit: contain;
   background: var(--video-bg);
+  cursor: pointer;
+}
+
+/* Big centred play / replay cue over the poster while paused */
+.bigPlay {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  color: #fff;
+  background: rgba(17, 17, 17, 0.55);
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
+  backdrop-filter: blur(10px) saturate(160%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35), 0 8px 24px -8px rgba(0, 0, 0, 0.6);
+  animation: cue-in var(--dur-medium) var(--ease-emphasized-decel);
+}
+.bigPlay svg {
+  width: 30px;
+  height: 30px;
+  fill: currentColor;
+}
+@keyframes cue-in {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+}
+.spinner {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 4px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #fff;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* The global rule stops animations; keep the spinner turning slowly so loading is still visible. */
+  .spinner {
+    animation: spin 2s linear infinite !important;
+  }
 }
 
 .controls {
+  display: grid;
+  gap: 0.35rem;
+}
+.seekRow {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+}
+.buttonRow {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.spacer {
+  flex: 1;
 }
 .playButton {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
   min-height: 44px;
-  min-width: 96px;
+  min-width: 104px;
   padding: 0 1rem;
+  margin-right: 0.25rem;
   border-radius: 999px;
   border: 0;
   background: var(--ink);
   color: var(--on-ink);
   font-weight: 700;
   cursor: pointer;
+  transition: transform var(--dur-short) var(--ease-standard);
+}
+.playButton:active {
+  transform: scale(0.96);
 }
 .playButton:disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }
-.playIcon svg {
+.icon svg {
   width: 18px;
   height: 18px;
   fill: currentColor;
   display: block;
 }
+.iconButton {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 50%;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color var(--dur-short) var(--ease-standard), transform var(--dur-short) var(--ease-standard);
+}
+.iconButton:hover:not(:disabled),
+.iconButton[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--surface-sunk) 90%, transparent);
+}
+.iconButton[aria-pressed="true"] {
+  color: var(--mango-strong);
+}
+.iconButton:active:not(:disabled) {
+  transform: scale(0.92);
+}
+.iconButton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.iconButton svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.iconButton svg.filled {
+  fill: currentColor;
+  stroke: none;
+}
+.iconButton svg text {
+  font: 700 7px/1 system-ui, sans-serif;
+  fill: currentColor;
+  stroke: none;
+}
+
 .seekLabel {
   flex: 1;
   display: flex;
   align-items: center;
   min-height: 44px;
 }
+/* Custom track: played (mango) · buffered (muted) · rest (sunk). --played / --buffered come from the component. */
 .seek {
+  --track: linear-gradient(
+    to right,
+    var(--mango-bar) 0 var(--played, 0%),
+    color-mix(in srgb, var(--ink-muted) 45%, transparent) var(--played, 0%) var(--buffered, 0%),
+    var(--surface-sunk) var(--buffered, 0%) 100%
+  );
+  -webkit-appearance: none;
+  appearance: none;
   width: 100%;
-  accent-color: var(--mango-strong);
-  min-height: 24px;
+  height: 24px;
+  margin: 0;
+  background: transparent;
   cursor: pointer;
+}
+.seek:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.seek::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--track);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--line) 70%, transparent);
+}
+.seek::-moz-range-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--track);
+}
+.seek::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: var(--mango-bar);
+  border: 2px solid var(--surface);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  transition: transform var(--dur-short) var(--ease-standard);
+}
+.seek::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--mango-bar);
+  border: 2px solid var(--surface);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+.seek:hover:not(:disabled)::-webkit-slider-thumb,
+.seek:active::-webkit-slider-thumb {
+  transform: scale(1.2);
 }
 .time {
   flex: none;
@@ -84,6 +252,25 @@
   color: var(--ink-muted);
   min-width: 6.5em;
   text-align: right;
+}
+
+/* Full screen: the video fills the screen, controls sit on a glass bar at the bottom. */
+.player[data-fullscreen] {
+  background: #000;
+  grid-template-rows: 1fr auto;
+  gap: 0;
+}
+.player[data-fullscreen] .frame {
+  max-height: none;
+  height: 100%;
+  aspect-ratio: auto;
+  border-radius: 0;
+}
+.player[data-fullscreen] .controls {
+  padding: 0.5rem 1rem 0.75rem;
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
 }
 
 .messages {

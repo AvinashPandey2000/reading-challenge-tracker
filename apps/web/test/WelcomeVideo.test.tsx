@@ -108,4 +108,33 @@ describe("WelcomeVideo", () => {
     await userEvent.click(await screen.findByRole("button", { name: "Play welcome video" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Playback stopped unexpectedly.");
   });
+  it("skips ±10 s, mutes, and shows Replay after the end; shortcuts work inside the player", async () => {
+    mockFetch({
+      "GET /api/video-progress": () => json({ positionSeconds: 0, updatedAt: null }),
+      "PUT /api/video-progress": (_u, init) => json({ positionSeconds: JSON.parse(String(init!.body)).positionSeconds, updatedAt: "now" }),
+    });
+    render(<WelcomeVideo />);
+    const video = screen.getByTestId("video-element") as HTMLVideoElement;
+    setMedia(video, { duration: 45, currentTime: 0, readyState: 1 });
+    fireEvent.loadedMetadata(video);
+
+    await userEvent.click(await screen.findByRole("button", { name: "Forward 10 seconds" }));
+    expect(video.currentTime).toBe(10);
+    await userEvent.click(screen.getByRole("button", { name: "Rewind 10 seconds" }));
+    expect(video.currentTime).toBe(0);
+
+    const mute = screen.getByRole("button", { name: "Mute" });
+    await userEvent.click(mute);
+    expect(video.muted).toBe(true);
+    fireEvent.volumeChange(video);
+    expect(mute).toHaveAttribute("aria-pressed", "true");
+
+    // "L" on a focused player control skips forward.
+    screen.getByRole("button", { name: "Play welcome video" }).focus();
+    await userEvent.keyboard("l");
+    expect(video.currentTime).toBe(10);
+
+    fireEvent.ended(video);
+    expect(await screen.findByRole("button", { name: "Play welcome video" })).toHaveTextContent("Replay");
+  });
 });

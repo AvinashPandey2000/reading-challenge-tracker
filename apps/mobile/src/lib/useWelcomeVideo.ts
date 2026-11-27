@@ -20,10 +20,17 @@ export type SaveState =
  * `readyToPlay`; pauses before that are ignored, so start-up never overwrites the saved time with 0.
  * No autoplay: the reader presses Play.
  */
-export function useWelcomeVideo(source: string = VIDEO_URL) {
+/** Seconds between player time updates; the seek bar animates across each interval. */
+export const TIME_UPDATE_INTERVAL = 0.25;
+
+/**
+ * `active` is false while the Video tab isn't on screen: playback pauses so audio doesn't keep
+ * running behind another tab.
+ */
+export function useWelcomeVideo(source: string = VIDEO_URL, active = true) {
   const player = useVideoPlayer(source, (p) => {
     p.loop = false;
-    p.timeUpdateEventInterval = 0.5;
+    p.timeUpdateEventInterval = TIME_UPDATE_INTERVAL;
   });
 
   const [playing, setPlaying] = useState(false);
@@ -34,6 +41,11 @@ export function useWelcomeVideo(source: string = VIDEO_URL) {
   const [savedPosition, setSavedPosition] = useState(0);
   const [saveState, setSaveState] = useState<SaveState>({ kind: "idle" });
   const [hasStarted, setHasStarted] = useState(false);
+  const [buffered, setBuffered] = useState(0);
+  const [loadingMedia, setLoadingMedia] = useState(player.status === "loading");
+  const [wantsPlay, setWantsPlay] = useState(false);
+  const [ended, setEnded] = useState(false);
+  const [muted, setMuted] = useState(false);
 
   const savedRef = useRef<number | null>(null);
   const ready = useRef(false);
@@ -105,49 +117,90 @@ export function useWelcomeVideo(source: string = VIDEO_URL) {
   }, []);
 
   useEventListener(player, "statusChange", ({ status }) => {
+    setLoadingMedia(status === "loading");
     if (status === "readyToPlay") markReady();
     if (status === "error") {
       setProblem(hasStarted ? "playback" : "load");
       setPlaying(false);
+      setWantsPlay(false);
     }
   });
 
   useEventListener(player, "playingChange", ({ isPlaying }) => {
     setPlaying(isPlaying);
+    if (isPlaying) setEnded(false);
+    else if (player.status !== "loading") setWantsPlay(false);
     if (!isPlaying && wasPlaying.current && resumeApplied.current) void save(player.currentTime);
     wasPlaying.current = isPlaying;
   });
 
-  useEventListener(player, "timeUpdate", ({ currentTime }) => setCurrent(currentTime));
+  useEventListener(player, "timeUpdate", ({ currentTime, bufferedPosition }) => {
+    setCurrent(currentTime);
+    if (bufferedPosition > 0) setBuffered(bufferedPosition);
+  });
+
+  useEventListener(player, "playToEnd", () => {
+    setEnded(true);
+    setWantsPlay(false);
+    setCurrent(player.duration || duration);
+  });
+
+  useEventListener(player, "mutedChange", ({ muted: m }) => setMuted(m));
 
   const play = useCallback(async () => {
     if (!resumeApplied.current && fetchPromise.current) await fetchPromise.current;
     if (player.status === "readyToPlay") ready.current = true;
     applyResume();
+    // Play after the end starts over.
+    const max = player.duration || duration;
+    if (max > 0 && player.currentTime >= max - 0.3) {
+      player.currentTime = 0;
+      setCurrent(0);
+    }
+    setEnded(false);
+    setWantsPlay(true);
     try {
       player.play();
       setHasStarted(true);
     } catch {
       setProblem("playback");
     }
-  }, [applyResume, player]);
+  }, [applyResume, duration, player]);
 
-  const pause = useCallback(() => player.pause(), [player]);
+  const pause = useCallback(() => {
+    setWantsPlay(false);
+    player.pause();
+  }, [player]);
 
-  const seekBy = useCallback(
-    (delta: number) => {
+  const seekTo = useCallback(
+    (time: number) => {
       const max = player.duration || duration;
-      const next = Math.max(0, Math.min(max > 0 ? max - 0.25 : Infinity, player.currentTime + delta));
+      const next = Math.max(0, Math.min(max > 0 ? max - 0.25 : Infinity, time));
       player.currentTime = next;
       setCurrent(next);
+      setEnded(false);
       // Seeking while paused is a deliberate new place: save it.
       if (!player.playing && resumeApplied.current) void save(next);
     },
     [duration, player, save],
   );
 
+  const seekBy = useCallback((delta: number) => seekTo(player.currentTime + delta), [player, seekTo]);
+
+  const toggleMute = useCallback(() => {
+    const next = !player.muted;
+    player.muted = next;
+    setMuted(next);
+  }, [player]);
+
+  // Leaving the Video tab pauses (and so saves the place).
+  useEffect(() => {
+    if (!active && player.playing) player.pause();
+  }, [active, player]);
+
   const reload = useCallback(() => {
     setProblem(null);
+    setWantsPlay(false);
     ready.current = false;
     resumeApplied.current = false;
     player.replace(source);
@@ -168,9 +221,16 @@ export function useWelcomeVideo(source: string = VIDEO_URL) {
     savedPosition,
     saveState,
     hasStarted,
+    buffered,
+    /** Waiting for media while the reader asked to play. */
+    buffering: wantsPlay && loadingMedia && problem === null,
+    ended,
+    muted,
     play,
     pause,
+    seekTo,
     seekBy,
+    toggleMute,
     reload,
     retrySave,
     reloadProgress: () => {
