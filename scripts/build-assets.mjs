@@ -17,7 +17,6 @@
  *   apps/web/public/images/reading-room.webp (960x640) + apps/mobile/assets/reading-room.webp
  *   apps/web/public/downloads/the-secret-garden-chapter-1.pdf
  *   apps/web/public/og-image.png (1200x630), apps/web/public/apple-icon.png, apps/web/public/icon.svg
- *   e2e/fixtures/test-clip.webm (deterministic 20 s test asset)
  */
 import { execFileSync } from "node:child_process";
 import { mkdirSync, readFileSync, statSync, writeFileSync, copyFileSync } from "node:fs";
@@ -36,7 +35,6 @@ if (!videoSrc || !imageSrc || !textSrc) {
 }
 for (const d of ["media", "images", "downloads"]) mkdirSync(join(pub, d), { recursive: true });
 mkdirSync(join(root, "apps/mobile/assets"), { recursive: true });
-mkdirSync(join(root, "e2e/fixtures"), { recursive: true });
 
 const ff = (args) => execFileSync(ffmpegPath, ["-hide_banner", "-loglevel", "error", "-y", ...args], { stdio: "inherit" });
 const kb = (p) => `${Math.round(statSync(p).size / 1024)} KB`;
@@ -51,10 +49,6 @@ ff(["-ss", START, "-i", videoSrc, "-t", DURATION, "-vf", "scale=640:-2", "-c:v",
 ff(["-ss", START, "-i", videoSrc, "-t", DURATION, "-vf", "scale=640:-2", "-c:v", "libvpx-vp9", "-crf", "38", "-b:v", "0",
   "-row-mt", "1", "-deadline", "good", "-cpu-used", "4", "-c:a", "libopus", "-b:a", "64k", webm]);
 ff(["-ss", "3", "-i", mp4, "-frames:v", "1", "-q:v", "4", join(pub, "media/welcome-poster.jpg")]);
-// Deterministic E2E fixture: synthetic test pattern + tone, no third-party media host involved.
-ff(["-f", "lavfi", "-i", "testsrc2=size=320x180:rate=25", "-f", "lavfi", "-i", "sine=frequency=440:sample_rate=48000",
-  "-t", "20", "-c:v", "libvpx-vp9", "-crf", "45", "-b:v", "0", "-deadline", "realtime", "-cpu-used", "8", "-c:a", "libopus", "-b:a", "32k",
-  join(root, "e2e/fixtures/test-clip.webm")]);
 console.log("video:", kb(mp4), kb(webm));
 
 // ---------- Hero image ----------

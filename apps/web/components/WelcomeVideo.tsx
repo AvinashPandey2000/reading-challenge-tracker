@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { formatTimestamp } from "@rct/shared";
 import { VIDEO } from "@/lib/site";
 import { useVideoProgress } from "@/lib/useVideoProgress";
@@ -17,6 +17,25 @@ export function WelcomeVideo() {
   const [problem, setProblem] = useState<MediaProblem>(null);
   const [starting, setStarting] = useState(false);
   const hasStarted = useRef(false);
+
+  const handleMetadata = useCallback(
+    (video: HTMLVideoElement) => {
+      setDuration(video.duration);
+      setProblem((p) => (p === "load" ? null : p));
+      progress.onLoadedMetadata();
+    },
+    [progress],
+  );
+
+  // Media events can fire before React hydrates and attaches listeners (the page is static HTML
+  // and the browser starts fetching metadata immediately). Catch up with the element's state once.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.readyState >= HTMLMediaElement.HAVE_METADATA && video.duration > 0) handleMetadata(video);
+    else if (video.error || video.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) setProblem("load");
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once after hydration
+  }, []);
 
   const play = useCallback(async () => {
     const video = videoRef.current;
@@ -88,11 +107,7 @@ export function WelcomeVideo() {
           aria-label={VIDEO.title}
           data-testid="video-element"
           onClick={togglePlay}
-          onLoadedMetadata={(e) => {
-            setDuration(e.currentTarget.duration);
-            setProblem((p) => (p === "load" ? null : p));
-            progress.onLoadedMetadata();
-          }}
+          onLoadedMetadata={(e) => handleMetadata(e.currentTarget)}
           onDurationChange={(e) => setDuration(e.currentTarget.duration || 0)}
           onTimeUpdate={(e) => setCurrent(e.currentTarget.currentTime)}
           onPlay={() => setPlaying(true)}

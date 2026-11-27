@@ -11,7 +11,7 @@ export const SAMPLE_PDF = {
   title: "The Secret Garden — Chapter I: There Is No One Left",
   author: "Frances Hodgson Burnett (1911, public domain)",
   /** Size of the committed file; checked by the E2E test. */
-  sizeLabel: "PDF · 6 pages · 13 KB",
+  sizeLabel: "PDF · 6 pages · 12 KB",
 };
 
 export const VIDEO = {
