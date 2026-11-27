@@ -7,7 +7,8 @@ export type ListId = z.infer<typeof ListIdSchema>;
 
 export const BookSchema = z.object({
   id: z.string(),
-  listId: ListIdSchema,
+  /** null for books that are only in My Library (not part of the challenge lists) */
+  listId: ListIdSchema.nullable(),
   title: z.string(),
   author: z.string(),
   read: z.boolean(),
@@ -49,7 +50,8 @@ export type UpdateBookBody = z.infer<typeof UpdateBookBodySchema>;
 
 export const UpdateBookResponseSchema = z.object({
   book: BookSchema,
-  list: ListSummarySchema,
+  /** The challenge list's new count, or null for library-only books. */
+  list: ListSummarySchema.nullable(),
 });
 export type UpdateBookResponse = z.infer<typeof UpdateBookResponseSchema>;
 
@@ -76,6 +78,9 @@ export const ERROR_CODES = [
   "INVALID_STATUS",
   "INVALID_POSITION",
   "INVALID_JSON",
+  "INVALID_BODY",
+  "NOT_READABLE",
+  "PAGE_OUT_OF_RANGE",
   "NOT_FOUND",
   "INTERNAL_ERROR",
 ] as const;

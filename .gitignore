@@ -18,3 +18,6 @@ apps/mobile/android/
 .DS_Store
 .tmp/
 .claude/
+
+# Local, private reader text (e.g. your own copy of a copyrighted book). Never commit.
+apps/api/content/local/

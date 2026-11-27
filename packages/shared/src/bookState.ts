@@ -100,6 +100,7 @@ export function booksReducer(state: BooksState, action: BooksAction): BooksState
     }
     case "save/success": {
       const { book, list: summary } = action.response;
+      if (!summary) return { ...state, pending: omit(state.pending, book.id) };
       const lists = state.lists.map((list) =>
         list.id !== summary.id
           ? list

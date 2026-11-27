@@ -71,7 +71,7 @@ describe("PATCH /api/books/:id", () => {
     const first = (await patch("the-hobbit", { read: true })).json() as UpdateBookResponse;
     const second = (await patch("the-hobbit", { read: true })).json() as UpdateBookResponse;
     expect(second.book.read).toBe(true);
-    expect(second.list.readCount).toBe(1);
+    expect(second.list!.readCount).toBe(1);
     expect(second.book.updatedAt).toBe(first.book.updatedAt);
     expect(count(await getLists(), "fiction").readCount).toBe(1);
   });

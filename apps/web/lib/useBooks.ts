@@ -6,7 +6,7 @@ import {
   booksReducer,
   canStartSave,
   initialBooksState,
-  savedAnnouncement,
+  updateAnnouncement,
 } from "@rct/shared";
 import { api } from "./api";
 
@@ -42,13 +42,7 @@ export function useBooks() {
       dispatch({
         type: "save/success",
         response,
-        announcement: savedAnnouncement(
-          response.book.title,
-          response.book.read,
-          response.list.title,
-          response.list.readCount,
-          response.list.total,
-        ),
+        announcement: updateAnnouncement(response),
       });
     } catch {
       dispatch({ type: "save/failure", bookId, read });

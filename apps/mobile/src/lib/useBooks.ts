@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import { AccessibilityInfo } from "react-native";
-import { LOAD_ERROR_MESSAGE, booksReducer, canStartSave, initialBooksState, savedAnnouncement } from "@rct/shared";
+import { LOAD_ERROR_MESSAGE, booksReducer, canStartSave, initialBooksState, updateAnnouncement } from "@rct/shared";
 import { api } from "./api";
 
 /** Same state machine as the web client (packages/shared/src/bookState.ts). */
@@ -39,7 +39,7 @@ export function useBooks() {
       dispatch({
         type: "save/success",
         response,
-        announcement: savedAnnouncement(response.book.title, response.book.read, response.list.title, response.list.readCount, response.list.total),
+        announcement: updateAnnouncement(response),
       });
     } catch {
       dispatch({ type: "save/failure", bookId, read });

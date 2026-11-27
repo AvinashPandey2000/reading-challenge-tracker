@@ -33,3 +33,13 @@ export function resumePosition(saved: number, duration: number | null | undefine
   if (saved >= duration - 0.5) return 0;
   return saved;
 }
+
+/** Announcement for a PATCH /api/books/:id response (challenge books include their list count). */
+export function updateAnnouncement(r: {
+  book: { title: string; read: boolean };
+  list: { title: string; readCount: number; total: number } | null;
+}): string {
+  return r.list
+    ? savedAnnouncement(r.book.title, r.book.read, r.list.title, r.list.readCount, r.list.total)
+    : `${r.book.title} marked as ${r.book.read ? "read" : "unread"}.`;
+}

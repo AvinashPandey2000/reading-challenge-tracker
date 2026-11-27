@@ -17,3 +17,4 @@ scripts
 coverage
 .expo
 *.md
+apps/api/content/local

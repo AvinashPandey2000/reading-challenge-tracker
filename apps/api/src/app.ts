@@ -1,12 +1,17 @@
 import Fastify, { type FastifyInstance, type FastifyServerOptions } from "fastify";
 import cors from "@fastify/cors";
-import { SaveVideoProgressBodySchema, UpdateBookBodySchema, computeRewards, offerState, savedAnnouncement } from "@rct/shared";
+import { SaveVideoProgressBodySchema, UpdateBookBodySchema, computeRewards, offerState, updateAnnouncement } from "@rct/shared";
 import { DEMO_READER_ID } from "./catalog.js";
 import { Store } from "./db.js";
 import { sendError } from "./errors.js";
+import { ContentStore } from "./content/store.js";
+import { ReadingRepo } from "./reading.js";
+import { registerReadingRoutes } from "./routes/reading.js";
 
 export interface BuildAppOptions {
   dbPath: string;
+  /** Reader text location (defaults to apps/api/content). */
+  content?: ContentStore;
   /** Comma-separated list of allowed origins, or "*" (development only). Unset = same-origin only. */
   corsOrigin?: string;
   logger?: FastifyServerOptions["logger"];
@@ -28,7 +33,7 @@ export async function buildApp(opts: BuildAppOptions): Promise<FastifyInstance> 
     const origins = opts.corsOrigin.split(",").map((o) => o.trim());
     await app.register(cors, {
       origin: origins.includes("*") ? true : origins,
-      methods: ["GET", "PATCH", "PUT", "OPTIONS"],
+      methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
     });
   }
 
@@ -86,7 +91,7 @@ export async function buildApp(opts: BuildAppOptions): Promise<FastifyInstance> 
     return {
       ...result,
       // Convenience text clients can announce verbatim.
-      message: savedAnnouncement(result.book.title, result.book.read, result.list.title, result.list.readCount, result.list.total),
+      message: updateAnnouncement(result),
     };
   });
 
@@ -95,6 +100,8 @@ export async function buildApp(opts: BuildAppOptions): Promise<FastifyInstance> 
     rewards: computeRewards(store.listBooks(), DEMO_READER_ID),
     offer: offerState(),
   }));
+
+  registerReadingRoutes(app, new ReadingRepo(store, opts.content ?? new ContentStore()));
 
   app.get("/api/video-progress", async () => store.getVideoProgress());
 
