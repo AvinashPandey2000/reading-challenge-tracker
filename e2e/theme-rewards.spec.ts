@@ -1,4 +1,4 @@
-import { count, expect, openChallenge, test } from "./fixtures";
+import { count, expect, openChallenge, test, SKIP_WALKTHROUGH } from "./fixtures";
 
 const bg = (page: import("@playwright/test").Page) => page.evaluate(() => getComputedStyle(document.body).backgroundColor);
 const LIGHT_BG = "rgb(251, 246, 236)";
@@ -7,6 +7,7 @@ const DARK_BG = "rgb(21, 19, 15)";
 test.describe("theme", () => {
   test("follows the system dark preference by default @mobile", async ({ browser }) => {
     const context = await browser.newContext({ colorScheme: "dark" });
+    await context.addInitScript(SKIP_WALKTHROUGH);
     const page = await context.newPage();
     await openChallenge(page);
     expect(await bg(page)).toBe(DARK_BG);
@@ -16,6 +17,7 @@ test.describe("theme", () => {
 
   test("manual choice overrides the system and survives a reload, without a flash", async ({ browser }) => {
     const context = await browser.newContext({ colorScheme: "dark" });
+    await context.addInitScript(SKIP_WALKTHROUGH);
     const page = await context.newPage();
     await openChallenge(page);
     await page.getByRole("radio", { name: "Light" }).check({ force: true });

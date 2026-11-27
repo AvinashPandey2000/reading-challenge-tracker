@@ -54,7 +54,14 @@ class ApiServer {
   }
 }
 
+/** Marks the first-visit walkthrough as seen, so it doesn't cover the page in other tests. */
+export const SKIP_WALKTHROUGH = () => localStorage.setItem("rct-walkthrough-done", "1");
+
 export const test = base.extend<{ api: ApiServer }>({
+  page: async ({ page }, use) => {
+    await page.addInitScript(SKIP_WALKTHROUGH);
+    await use(page);
+  },
   api: [
     async ({}, use) => {
       const server = new ApiServer();

@@ -48,7 +48,7 @@ export function ReadingChallenge() {
               </button>
             </div>
           )}
-          <div className={styles.lists}>
+          <div className={styles.lists} data-tour="lists">
             {state.lists.map((list) => (
               <BookList
                 key={list.id}

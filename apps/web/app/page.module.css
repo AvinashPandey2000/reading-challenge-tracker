@@ -125,3 +125,16 @@
 .backLink:hover {
   color: var(--ink);
 }
+
+.tourButton {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-weight: 700;
+  color: var(--mango-strong);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  min-height: 32px;
+}

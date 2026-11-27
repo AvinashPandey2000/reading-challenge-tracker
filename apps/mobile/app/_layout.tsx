@@ -25,14 +25,10 @@ function RootStack() {
     <>
       <StatusBar style={scheme === "dark" ? "light" : "dark"} />
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
-        <Stack.Protected guard={!onboarded}>
-          <Stack.Screen name="onboarding" options={{ animation: "fade" }} />
-        </Stack.Protected>
-        <Stack.Protected guard={!!onboarded}>
-          <Stack.Screen name="(tabs)" options={{ animation: "fade" }} />
-          <Stack.Screen name="book/[id]" />
-          <Stack.Screen name="read/[id]" options={{ animation: "slide_from_bottom", gestureEnabled: true }} />
-        </Stack.Protected>
+        {/* First-time users get the walkthrough on the Challenge tab (see ChallengeScreen). */}
+        <Stack.Screen name="(tabs)" options={{ animation: "fade" }} />
+        <Stack.Screen name="book/[id]" />
+        <Stack.Screen name="read/[id]" options={{ animation: "slide_from_bottom", gestureEnabled: true }} />
       </Stack>
     </>
   );

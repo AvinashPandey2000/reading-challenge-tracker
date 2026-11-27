@@ -8,12 +8,23 @@ beforeEach(async () => {
   mockFetch({ "GET /api/books": () => json(freshLists()), ...progressRoutes() });
 });
 
-it("shows the intro on first launch; Skip saves the flag and opens the Challenge tab", async () => {
+it("first launch: the walkthrough explains each part step by step and Finish remembers it", async () => {
   await renderApp();
-  expect(await screen.findByText("Track two reading lists")).toBeOnTheScreen();
-  expect(screen.getAllByLabelText(/^Slide 1 of 3/).length).toBeGreaterThan(0);
-  await fireEvent.press(screen.getByRole("button", { name: "Skip the intro" }));
-  expect(await screen.findByText("Your reading challenge")).toBeOnTheScreen();
+  expect(await screen.findByText("Welcome to Lantern Lane Library 👋")).toBeOnTheScreen();
+  expect(screen.getByText("STEP 1 OF 6")).toBeOnTheScreen();
+
+  await fireEvent.press(screen.getByRole("button", { name: "Next" }));
+  expect(await screen.findByText("Your reading lists")).toBeOnTheScreen();
+  await fireEvent.press(screen.getByRole("button", { name: "Back" }));
+  expect(await screen.findByText("Welcome to Lantern Lane Library 👋")).toBeOnTheScreen();
+
+  for (const title of ["Your reading lists", "Mark a book as read", "Challenge offer", "Tabs at the bottom", "You're all set!"]) {
+    await fireEvent.press(screen.getByRole("button", { name: "Next" }));
+    expect(await screen.findByText(title)).toBeOnTheScreen();
+  }
+  expect(screen.queryByRole("button", { name: "Skip tour" })).toBeNull();
+  await fireEvent.press(screen.getByRole("button", { name: "Finish" }));
+  await waitFor(() => expect(screen.queryByTestId("walkthrough")).toBeNull());
   await waitFor(async () => expect(await AsyncStorage.getItem("rct.onboarded")).toBe("1"));
-  expect(await screen.findByTestId("count-fiction")).toHaveTextContent("0 of 3 read");
+  expect(screen.getByTestId("count-fiction")).toHaveTextContent("0 of 3 read");
 });

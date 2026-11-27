@@ -1,0 +1,41 @@
+.root { position: fixed; inset: 0; z-index: 100; }
+.dim { position: fixed; inset: 0; background: rgba(20, 18, 14, 0.62); }
+/* The highlight is a transparent hole; the huge shadow dims everything around it. */
+.spotlight {
+  position: fixed;
+  border-radius: 16px;
+  box-shadow: 0 0 0 9999px rgba(20, 18, 14, 0.62), 0 0 0 3px var(--mango);
+  transition: top var(--dur-medium) var(--ease-standard), left var(--dur-medium) var(--ease-standard),
+    width var(--dur-medium) var(--ease-standard), height var(--dur-medium) var(--ease-standard);
+  pointer-events: none;
+}
+.card {
+  position: fixed;
+  padding: 1.1rem 1.2rem 1rem;
+  border-radius: 18px;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: 0 18px 50px -12px rgba(0, 0, 0, 0.45);
+  display: grid;
+  gap: 0.5rem;
+  animation: appear var(--dur-medium) var(--ease-emphasized-decel);
+  outline: none;
+}
+.centered { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+@keyframes appear { from { opacity: 0; translate: 0 6px; } to { opacity: 1; translate: 0 0; } }
+.count { margin: 0; font-size: 0.8rem; font-weight: 700; color: var(--mango-strong); letter-spacing: 0.03em; text-transform: uppercase; }
+.title { margin: 0; font-size: 1.25rem; }
+.body { margin: 0; color: var(--ink-muted); }
+.dots { display: flex; gap: 5px; margin: 0.25rem 0; }
+.dots span { width: 6px; height: 6px; border-radius: 3px; background: var(--line); transition: width var(--dur-short) var(--ease-standard); }
+.dots span[data-active] { width: 18px; background: var(--mango-strong); }
+.actions { display: flex; align-items: center; gap: 0.5rem; }
+.spacer { flex: 1; }
+.primary, .secondary, .skip {
+  min-height: 44px; padding: 0 1rem; border-radius: 999px; font: inherit; font-weight: 700; cursor: pointer;
+}
+.primary { border: 0; background: var(--ink); color: var(--on-ink); }
+.secondary { border: 2px solid var(--ink); background: var(--surface); color: var(--ink); }
+.skip { border: 0; background: transparent; color: var(--ink-muted); text-decoration: underline; text-underline-offset: 3px; padding: 0 0.4rem; }
+.primary:focus-visible, .secondary:focus-visible, .skip:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }

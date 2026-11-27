@@ -23,7 +23,7 @@ export function SiteHeader({ current }: { current: "challenge" | "library" }) {
             </svg>
             <span className={styles.brandName}>{LIBRARY_NAME}</span>
           </Link>
-          <nav aria-label="Main" className={styles.nav}>
+          <nav aria-label="Main" className={styles.nav} data-tour="nav">
             <Link href="/" aria-current={current === "challenge" ? "page" : undefined} className={styles.navLink}>
               Challenge
             </Link>

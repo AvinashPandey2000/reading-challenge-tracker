@@ -89,7 +89,7 @@ export function WelcomeVideo() {
   const { saveState } = progress;
 
   return (
-    <section className={`glass ${styles.card}`} aria-labelledby="video-heading" data-testid="welcome-video">
+    <section className={`glass ${styles.card}`} aria-labelledby="video-heading" data-testid="welcome-video" data-tour="video">
       <div className={styles.headerRow}>
         <h2 id="video-heading" className={styles.heading}>
           Welcome video

@@ -7,6 +7,7 @@ import { type } from "../theme/typography";
 import { BookRow } from "./BookRow";
 import { ProgressBar } from "./ProgressBar";
 import { GlassSurface } from "./GlassSurface";
+import { TourTarget } from "./Walkthrough";
 
 interface Props {
   list: ReadingList;
@@ -15,7 +16,7 @@ interface Props {
   onToggle: (bookId: string, read: boolean) => void;
 }
 
-export function ListCard({ list, pending, errors, onToggle }: Props) {
+export function ListCard({ list, pending, errors, onToggle, tourFirstBook = false }: Props & { tourFirstBook?: boolean }) {
   const styles = useThemedStyles(makeStyles);
   const complete = list.total > 0 && list.readCount === list.total;
   return (
@@ -30,9 +31,16 @@ export function ListCard({ list, pending, errors, onToggle }: Props) {
       <View style={styles.bar}>
         <ProgressBar value={list.readCount} max={list.total} />
       </View>
-      {list.books.map((book) => (
-        <BookRow key={book.id} book={book} saving={book.id in pending} error={errors[book.id]} onToggle={(read) => onToggle(book.id, read)} />
-      ))}
+      {list.books.map((book, i) => {
+        const row = <BookRow key={book.id} book={book} saving={book.id in pending} error={errors[book.id]} onToggle={(read) => onToggle(book.id, read)} />;
+        return tourFirstBook && i === 0 ? (
+          <TourTarget key={book.id} id="book">
+            {row}
+          </TourTarget>
+        ) : (
+          row
+        );
+      })}
     </GlassSurface>
   );
 }

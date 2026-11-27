@@ -1,4 +1,4 @@
-import { expect, openChallenge, test } from "./fixtures";
+import { expect, openChallenge, test, SKIP_WALKTHROUGH } from "./fixtures";
 
 test.describe("layout and accessibility", () => {
   test("lists sit side by side on desktop", async ({ page, isMobile }) => {
@@ -49,6 +49,7 @@ test.describe("layout and accessibility", () => {
 
   test("respects reduced motion", async ({ browser }) => {
     const context = await browser.newContext({ reducedMotion: "reduce" });
+    await context.addInitScript(SKIP_WALKTHROUGH);
     const page = await context.newPage();
     await openChallenge(page);
     const fill = page.getByTestId("list-fiction").locator("[role=progressbar] > div");

@@ -4,12 +4,17 @@ import { BackgroundBubbles } from "../components/BackgroundBubbles";
 import { spacing } from "../theme/spacing";
 
 /** Common tab screen: bubble backdrop + safe area + scroll that clears the floating tab bar. */
-export function ScreenShell({ children, testID, ...rest }: ScrollViewProps & { children: React.ReactNode }) {
+export function ScreenShell({
+  children,
+  testID,
+  scrollRef,
+  ...rest
+}: ScrollViewProps & { children: React.ReactNode; scrollRef?: React.Ref<React.ComponentRef<typeof ScrollView>> }) {
   return (
     <View style={styles.root}>
       <BackgroundBubbles />
       <SafeAreaView style={styles.root} edges={["top", "left", "right"]}>
-        <ScrollView contentContainerStyle={styles.content} contentInsetAdjustmentBehavior="automatic" testID={testID} {...rest}>
+        <ScrollView ref={scrollRef} contentContainerStyle={styles.content} contentInsetAdjustmentBehavior="automatic" testID={testID} {...rest}>
           {children}
         </ScrollView>
       </SafeAreaView>

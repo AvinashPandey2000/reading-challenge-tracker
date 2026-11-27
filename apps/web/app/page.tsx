@@ -4,6 +4,7 @@ import { SamplePdf } from "@/components/SamplePdf";
 import { HeroImage } from "@/components/HeroImage";
 import { LIBRARY_NAME } from "@/lib/site";
 import { SiteHeader } from "@/components/SiteHeader";
+import { TakeTourButton, Walkthrough } from "@/components/Walkthrough";
 import { OfferBanner } from "@/components/OfferBanner";
 import styles from "./page.module.css";
 
@@ -48,7 +49,8 @@ export default function Home() {
       <footer className={styles.footer}>
         <div className={styles.inner}>
           <p>
-            {LIBRARY_NAME} is a fictional library made for a coding exercise. One demo reader; no sign-in.
+            {LIBRARY_NAME} is a fictional library made for a coding exercise. One demo reader; no sign-in.{" "}
+            <TakeTourButton className={styles.tourButton} />
           </p>
           <p>
             Photo: Wikimedia Commons (see credits in the project&apos;s ASSETS.md). Video: Big Buck Bunny © Blender
@@ -56,6 +58,7 @@ export default function Home() {
           </p>
         </div>
       </footer>
+      <Walkthrough />
     </>
   );
 }

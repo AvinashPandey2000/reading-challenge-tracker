@@ -8,9 +8,10 @@ beforeEach(async () => {
   mockFetch({ "GET /api/books": () => json(freshLists()), ...progressRoutes() });
 });
 
-it("does not show the intro again once it has been seen", async () => {
+it("does not show the walkthrough again once it has been seen", async () => {
   await AsyncStorage.setItem("rct.onboarded", "1");
   await renderApp();
   expect(await screen.findByText("Your reading challenge")).toBeOnTheScreen();
-  expect(screen.queryByText("Track two reading lists")).toBeNull();
+  expect(await screen.findByTestId("count-fiction")).toBeOnTheScreen();
+  expect(screen.queryByTestId("walkthrough")).toBeNull();
 });

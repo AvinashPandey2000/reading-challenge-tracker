@@ -1,4 +1,5 @@
 import { StyleSheet, Text, View } from "react-native";
+import { router } from "expo-router";
 import { DEMO_READER_ID, computeRewards } from "@rct/shared";
 import { useBooksContext } from "../lib/BooksProvider";
 import { useOnboarding } from "../lib/OnboardingProvider";
@@ -43,7 +44,14 @@ export function RewardsScreen() {
         </Text>
         <Text style={styles.label}>Appearance</Text>
         <AppearancePicker />
-        <Button label="Show the intro again" variant="outline" onPress={replay} />
+        <Button
+          label="Take the tour"
+          variant="outline"
+          onPress={() => {
+            replay();
+            router.navigate("/");
+          }}
+        />
       </GlassSurface>
     </ScreenShell>
   );

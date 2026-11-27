@@ -12,7 +12,7 @@ const ICONS: Record<RewardId, React.ReactNode> = {
 export function Rewards({ lists, justUnlocked }: { lists: ReadingList[]; justUnlocked: RewardId[] }) {
   const rewards = computeRewards(lists, DEMO_READER_ID);
   return (
-    <section className={styles.section} aria-labelledby="rewards-heading" data-testid="rewards">
+    <section className={styles.section} aria-labelledby="rewards-heading" data-testid="rewards" data-tour="rewards">
       <h2 id="rewards-heading" className={styles.heading}>
         Rewards
       </h2>

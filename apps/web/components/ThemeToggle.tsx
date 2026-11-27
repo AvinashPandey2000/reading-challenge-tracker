@@ -30,7 +30,7 @@ const OPTIONS: { value: ThemePreference; label: string; icon: React.ReactNode }[
 export function ThemeToggle() {
   const pref = useThemePreference();
   return (
-    <fieldset className={styles.group} data-testid="theme-toggle">
+    <fieldset className={styles.group} data-testid="theme-toggle" data-tour="theme">
       <legend className={styles.srOnly}>Colour theme</legend>
       {OPTIONS.map((o) => (
         <label key={o.value} className={styles.option} title={`${o.label} theme`}>

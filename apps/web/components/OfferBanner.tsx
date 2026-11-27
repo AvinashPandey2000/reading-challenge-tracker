@@ -16,7 +16,7 @@ export function OfferBanner() {
   const message = offerMessage({ ...offerState(), daysLeft: daysLeft ?? 0, ended });
 
   return (
-    <aside className={`glass ${styles.banner}`} aria-labelledby="offer-heading" data-testid="offer-banner">
+    <aside className={`glass ${styles.banner}`} aria-labelledby="offer-heading" data-testid="offer-banner" data-tour="offer">
       <span className={styles.badge} aria-hidden="true">
         <svg viewBox="0 0 24 24" focusable="false">
           <path d="M12 2.8l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.1l-5.2 2.7 1-5.8L3.6 8.9l5.8-.8z" />

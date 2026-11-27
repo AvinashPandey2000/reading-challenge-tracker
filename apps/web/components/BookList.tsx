@@ -42,14 +42,16 @@ export function BookList({ list, pending, errors, onToggle }: Props) {
       </div>
 
       <ul className={styles.books}>
-        {list.books.map((book) => {
+        {list.books.map((book, bookIndex) => {
+          // The walkthrough points at the first book of the first list.
+          const tourFirst = list.id === "fiction" && bookIndex === 0;
           const saving = book.id in pending;
           const error = errors[book.id];
           const inputId = `book-${book.id}`;
           const statusId = `${inputId}-status`;
           return (
             <li key={book.id} className={styles.bookRow} data-read={book.read || undefined} data-testid={`book-${book.id}`}>
-              <div className={styles.bookMain}>
+              <div className={styles.bookMain} data-tour={tourFirst ? "book" : undefined}>
                 <input
                   id={inputId}
                   type="checkbox"
@@ -76,7 +78,7 @@ export function BookList({ list, pending, errors, onToggle }: Props) {
                 <span id={statusId} className={styles.status} data-state={saving ? "saving" : book.read ? "read" : "unread"}>
                   {saving ? "Saving…" : book.read ? "✓ Read" : "Not read yet"}
                 </span>
-                <Link href={`/books/${book.id}`} className={styles.detailsLink} aria-label={`${book.title}: details and reading`}>
+                <Link href={`/books/${book.id}`} className={styles.detailsLink} aria-label={`${book.title}: details and reading`} data-tour={tourFirst ? "details" : undefined}>
                   <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
                     <path d="M7.5 4.5 13 10l-5.5 5.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
