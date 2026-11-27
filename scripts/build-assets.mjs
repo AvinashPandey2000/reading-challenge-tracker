@@ -14,12 +14,12 @@
  *   apps/web/public/media/welcome.mp4  (H.264/AAC, 45 s, faststart)  - iOS/Android/Safari
  *   apps/web/public/media/welcome.webm (VP9/Opus)                    - Chromium builds without H.264
  *   apps/web/public/media/welcome-poster.jpg
- *   apps/web/public/images/reading-room.webp (960x640) + apps/mobile/assets/reading-room.webp
+ *   apps/web/public/images/reading-room.webp (960x640)
  *   apps/web/public/downloads/the-secret-garden-chapter-1.pdf
  *   apps/web/public/og-image.png (1200x630), apps/web/public/apple-icon.png, apps/web/public/icon.svg
  */
 import { execFileSync } from "node:child_process";
-import { mkdirSync, readFileSync, statSync, writeFileSync, copyFileSync } from "node:fs";
+import { mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import ffmpegPath from "ffmpeg-static";
@@ -54,7 +54,6 @@ console.log("video:", kb(mp4), kb(webm));
 // ---------- Hero image ----------
 const heroOut = join(pub, "images/reading-room.webp");
 await sharp(imageSrc).resize(960, 640, { fit: "cover", position: "centre" }).webp({ quality: 72 }).toFile(heroOut);
-copyFileSync(heroOut, join(root, "apps/mobile/assets/reading-room.webp"));
 console.log("hero:", kb(heroOut));
 
 // ---------- Sample PDF: The Secret Garden, Chapter I ----------

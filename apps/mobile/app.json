@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "Reading Challenge",
+    "slug": "reading-challenge-tracker",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#FBF6EC",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "org.example.readingchallenge",
+      "infoPlist": {
+        "NSAppTransportSecurity": { "NSAllowsLocalNetworking": true, "NSAllowsArbitraryLoads": true }
+      }
+    },
+    "android": {
+      "package": "org.example.readingchallenge",
+      "adaptiveIcon": { "foregroundImage": "./assets/icon.png", "backgroundColor": "#1D1B16" }
+    },
+    "plugins": [["expo-video", { "supportsBackgroundPlayback": false, "supportsPictureInPicture": false }]]
+  }
+}

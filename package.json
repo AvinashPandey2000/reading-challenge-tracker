@@ -17,7 +17,7 @@
     "build": "npm run build:shared && npm run build -w @rct/api && npm run build -w @rct/web",
     "dev": "npm run build:shared && concurrently -k -n api,web -c yellow,cyan \"npm run dev -w @rct/api\" \"npm run dev -w @rct/web\"",
     "start": "node docker/start.mjs",
-    "mobile": "npm run start -w @rct/mobile",
+    "mobile": "npm run build:shared && npm run start -w @rct/mobile",
     "lint": "eslint .",
     "typecheck": "npm run build:shared && npm run typecheck --workspaces --if-present",
     "test": "npm run build:shared && npm run test -w @rct/shared && npm run test -w @rct/api && npm run test -w @rct/web && npm run test -w @rct/mobile",
