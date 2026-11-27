@@ -1,0 +1,269 @@
+.challenge {
+  display: grid;
+  gap: 1rem;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.lists {
+  display: grid;
+  gap: 1.25rem;
+}
+@media (min-width: 760px) {
+  .lists {
+    grid-template-columns: 1fr 1fr;
+  }
+  .loadingText {
+    grid-column: 1 / -1;
+  }
+}
+
+.listCard {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.25rem 1.25rem 0.5rem;
+}
+
+.listHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.listTitle {
+  font-size: 1.5rem;
+}
+.count {
+  margin: 0;
+  font-weight: 600;
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+}
+.countNumber {
+  font-family: var(--font-display-stack);
+  font-size: 1.6rem;
+  color: var(--mango-strong);
+}
+.completeTag {
+  color: var(--green);
+}
+
+.progressTrack {
+  margin: 0.75rem 0 0.5rem;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--surface-sunk);
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+.progressFill {
+  height: 100%;
+  background: var(--mango-bar);
+  border-radius: 999px;
+  transition: width var(--dur-medium) var(--ease-standard), background-color var(--dur-medium) var(--ease-standard);
+}
+.progressFill[data-complete] {
+  background: var(--green);
+}
+
+.books {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.bookRow {
+  border-top: 1px solid var(--line);
+}
+.bookRow:first-child {
+  border-top: 0;
+}
+
+.bookMain {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 60px;
+}
+
+/* Native checkbox kept for semantics + keyboard; visually replaced by .box */
+.checkbox {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+}
+
+.bookLabel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.7rem 0;
+  min-height: 48px;
+  cursor: pointer;
+}
+.checkbox[aria-busy="true"] + .bookLabel {
+  cursor: progress;
+}
+
+.box {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 2px solid var(--ink-muted);
+  background: var(--surface);
+  color: #fff;
+  transition: background-color var(--dur-short) var(--ease-standard), border-color var(--dur-short) var(--ease-standard);
+}
+.checkmark {
+  width: 20px;
+  height: 20px;
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity var(--dur-short) var(--ease-standard), transform var(--dur-short) var(--ease-emphasized-decel);
+}
+.checkbox:checked + .bookLabel .box {
+  background: var(--green);
+  border-color: var(--green);
+}
+.checkbox:checked + .bookLabel .checkmark {
+  opacity: 1;
+  transform: scale(1);
+}
+.checkbox:focus-visible + .bookLabel .box {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+.bookLabel:hover .box {
+  border-color: var(--ink);
+}
+
+.bookText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.bookTitle {
+  font-weight: 600;
+}
+.bookAuthor {
+  font-size: 0.875rem;
+  color: var(--ink-muted);
+}
+
+.status {
+  flex: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  color: var(--ink-muted);
+  background: var(--surface-sunk);
+}
+.status[data-state="read"] {
+  color: var(--green);
+  background: var(--green-soft);
+}
+.status[data-state="saving"] {
+  color: var(--mango-strong);
+  background: #fdf0da;
+}
+
+.rowError {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0 0 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.retryButton {
+  flex: none;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 1rem;
+  border-radius: 999px;
+  border: 2px solid currentColor;
+  background: var(--surface);
+  color: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.retryButton:hover {
+  background: #fff;
+}
+
+.primaryButton {
+  min-height: 44px;
+  padding: 0 1.25rem;
+  border-radius: 999px;
+  border: 0;
+  background: var(--ink);
+  color: var(--surface);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.loadError,
+.inlineNotice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius);
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-weight: 600;
+}
+.loadError p {
+  margin: 0;
+}
+
+.loadingText {
+  margin: 0;
+  color: var(--ink-muted);
+  font-weight: 600;
+}
+.skeletonCard {
+  padding-bottom: 1.25rem;
+}
+.skeletonLine,
+.skeletonRow {
+  background: var(--surface-sunk);
+  border-radius: 6px;
+}
+.skeletonLine {
+  height: 1rem;
+  margin-bottom: 0.6rem;
+}
+.skeletonRow {
+  height: 44px;
+  margin-top: 0.75rem;
+}

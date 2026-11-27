@@ -1,0 +1,44 @@
+{
+  "name": "reading-challenge-tracker",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Reading Challenge Tracker for the fictional Lantern Lane Library: Next.js web, Node API with SQLite, Expo mobile.",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "workspaces": [
+    "packages/shared",
+    "apps/api",
+    "apps/web",
+    "apps/mobile"
+  ],
+  "scripts": {
+    "build:shared": "npm run build -w @rct/shared",
+    "build": "npm run build:shared && npm run build -w @rct/api && npm run build -w @rct/web",
+    "dev": "npm run build:shared && concurrently -k -n api,web -c yellow,cyan \"npm run dev -w @rct/api\" \"npm run dev -w @rct/web\"",
+    "start": "node docker/start.mjs",
+    "mobile": "npm run start -w @rct/mobile",
+    "lint": "eslint .",
+    "typecheck": "npm run build:shared && npm run typecheck --workspaces --if-present",
+    "test": "npm run build:shared && npm run test -w @rct/shared && npm run test -w @rct/api && npm run test -w @rct/web && npm run test -w @rct/mobile",
+    "test:e2e": "playwright test",
+    "docker:smoke": "bash scripts/docker-smoke.sh",
+    "check:contrast": "node scripts/check-contrast.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.5",
+    "@playwright/test": "1.65.1",
+    "@types/node": "24.19.4",
+    "concurrently": "10.0.7",
+    "eslint": "9.39.5",
+    "eslint-plugin-jsx-a11y": "6.10.2",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "ffmpeg-static": "5.3.0",
+    "globals": "17.14.0",
+    "pdf-lib": "1.17.1",
+    "sharp": "0.35.5",
+    "tsx": "4.23.15",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.74.0"
+  }
+}

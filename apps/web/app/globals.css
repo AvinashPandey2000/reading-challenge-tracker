@@ -1,0 +1,99 @@
+:root {
+  --bg: #fbf6ec;
+  --surface: #fffdf8;
+  --surface-sunk: #f4ecdc;
+  --ink: #1d1b16;
+  --ink-muted: #574f43;
+  --line: #e4d8c2;
+  --mango: #f4a422; /* decorative fills only */
+  --mango-strong: #a35400; /* mango used for text / meaningful graphics (>= 4.5:1 on ivory) */
+  --mango-bar: #d97a06; /* progress fill (>= 3:1 against the track) */
+  --green: #2f6b3a;
+  --green-soft: #e3efe2;
+  --danger: #a3261b;
+  --danger-soft: #fbe9e4;
+  --focus: #1d1b16;
+
+  --radius: 14px;
+  --radius-sm: 10px;
+  --shadow: 0 1px 0 rgba(29, 27, 22, 0.04), 0 8px 24px -12px rgba(29, 27, 22, 0.18);
+
+  /* Material 3 motion tokens: short durations + standard easing */
+  --dur-short: 180ms;
+  --dur-medium: 200ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-emphasized-decel: cubic-bezier(0.05, 0.7, 0.1, 1);
+
+  --font-display-stack: var(--font-display), "Iowan Old Style", Georgia, serif;
+  --font-body-stack: var(--font-body), system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body-stack);
+  font-size: 1rem;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display-stack);
+  line-height: 1.15;
+  margin: 0;
+}
+
+a {
+  color: var(--mango-strong);
+  text-underline-offset: 3px;
+}
+
+button {
+  font: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -100px;
+  z-index: 10;
+  background: var(--ink);
+  color: var(--surface);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  font-weight: 600;
+}
+.skip-link:focus {
+  top: 1rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0s !important;
+    scroll-behavior: auto !important;
+  }
+}
