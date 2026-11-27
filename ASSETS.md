@@ -11,6 +11,10 @@ Every third-party asset is served from this repository, so nothing depends on a 
 | `apps/web/public/downloads/the-secret-garden-chapter-1.pdf` | **"The Secret Garden — Chapter I: There Is No One Left"**, a 6-page A5 PDF (12 KB) | Text: Frances Hodgson Burnett (1849–1924). Typeset for this project with `pdf-lib` and the standard Times fonts | Text taken from Project Gutenberg eBook #113 (mirror: https://gutenberg.pglaf.org/1/1/113/113-0.txt). The Gutenberg header, footer and trademark are not included. | **Public domain.** First published 1911; the author died in 1924, so the work is public domain in the US and in life+70 countries. This PDF edition is a new typesetting of that public-domain text, not a copy of anyone else's PDF, and it may be redistributed freely. | "Download sample PDF" link on web and Expo. Only this chapter is offered; none of the other listed books has a download. |
 | `apps/web/public/og-image.png` (1200×630), `icon.svg`, `apple-icon.png`, `apps/mobile/assets/icon.png` | Social preview image and app icon | Original artwork drawn as SVG in `scripts/build-assets.mjs` | — | Created for this project | Open Graph / Twitter card, favicon, Expo app icon |
 
+## Icons, badges and decorative elements
+
+The theme-toggle icons, reward badges, offer star and background bubbles on the web are drawn in CSS/SVG for this project. The mobile tab icons are system SF Symbols (iOS) and Material Symbols (Android) rendered by the OS. Intro and reward emoji are the platform's system emoji font. No new third-party files were added for these features. The splash image reuses the app icon from the table above.
+
 ## Fonts
 
 The web app uses **Fraunces** (headings) and **Public Sans** (body), self-hosted at build time by `next/font/google`. Both are under the [SIL Open Font License 1.1](https://openfontlicense.org/). The Expo app uses the platform's system fonts (Georgia/serif for headings).

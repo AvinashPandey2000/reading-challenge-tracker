@@ -1,10 +1,12 @@
 import { StyleSheet, Text, View } from "react-native";
 import { formatCount, type ReadingList, type SaveError } from "@rct/shared";
-import { colors } from "../theme/colors";
-import { radius, spacing } from "../theme/spacing";
+import type { Colors } from "../theme/colors";
+import { useThemedStyles } from "../theme/ThemeProvider";
+import { spacing } from "../theme/spacing";
 import { type } from "../theme/typography";
 import { BookRow } from "./BookRow";
 import { ProgressBar } from "./ProgressBar";
+import { GlassSurface } from "./GlassSurface";
 
 interface Props {
   list: ReadingList;
@@ -14,9 +16,10 @@ interface Props {
 }
 
 export function ListCard({ list, pending, errors, onToggle }: Props) {
+  const styles = useThemedStyles(makeStyles);
   const complete = list.total > 0 && list.readCount === list.total;
   return (
-    <View style={styles.card} testID={`list-${list.id}`}>
+    <GlassSurface style={styles.card} testID={`list-${list.id}`}>
       <View style={styles.header} accessible accessibilityRole="header" accessibilityLabel={`${list.title}, ${formatCount(list.readCount, list.total)}`}>
         <Text style={styles.title}>{list.title}</Text>
         <Text style={styles.count} testID={`count-${list.id}`}>
@@ -30,16 +33,13 @@ export function ListCard({ list, pending, errors, onToggle }: Props) {
       {list.books.map((book) => (
         <BookRow key={book.id} book={book} saving={book.id in pending} error={errors[book.id]} onToggle={(read) => onToggle(book.id, read)} />
       ))}
-    </View>
+    </GlassSurface>
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) =>
+  StyleSheet.create({
   card: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.line,
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.lg,
     paddingBottom: spacing.xs,

@@ -2,14 +2,17 @@ import { StyleSheet, Text, View } from "react-native";
 import { VideoView } from "expo-video";
 import { formatTimestamp } from "@rct/shared";
 import { useWelcomeVideo } from "../lib/useWelcomeVideo";
-import { colors } from "../theme/colors";
+import type { Colors } from "../theme/colors";
+import { useThemedStyles } from "../theme/ThemeProvider";
 import { radius, spacing } from "../theme/spacing";
 import { type } from "../theme/typography";
 import { Button } from "./Button";
 import { Notice } from "./Notice";
+import { GlassSurface } from "./GlassSurface";
 
 /** Compact player: fixed 16:9 at the card width, capped so the lists stay the focus. */
 export function WelcomeVideo() {
+  const styles = useThemedStyles(makeStyles);
   const v = useWelcomeVideo();
   const resumeHint =
     v.progressLoad === "ready" && v.savedPosition > 0 && !v.hasStarted && v.saveState.kind === "idle"
@@ -17,7 +20,7 @@ export function WelcomeVideo() {
       : null;
 
   return (
-    <View style={styles.card} testID="welcome-video">
+    <GlassSurface style={styles.card} testID="welcome-video">
       <Text style={styles.heading} accessibilityRole="header">
         Welcome video
       </Text>
@@ -66,16 +69,13 @@ export function WelcomeVideo() {
         {resumeHint && <Notice tone="info" message={resumeHint} testID="resume-hint" />}
       </View>
       <Text style={styles.credit}>Clip from Big Buck Bunny © Blender Foundation, CC BY 3.0</Text>
-    </View>
+    </GlassSurface>
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) =>
+  StyleSheet.create({
   card: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.line,
     padding: spacing.lg,
     gap: spacing.sm,
   },

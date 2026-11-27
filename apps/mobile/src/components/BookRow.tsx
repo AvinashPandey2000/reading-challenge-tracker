@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import type { Book, SaveError } from "@rct/shared";
-import { colors } from "../theme/colors";
+import type { Colors } from "../theme/colors";
+import { useThemedStyles } from "../theme/ThemeProvider";
 import { spacing, touchTarget } from "../theme/spacing";
 import { type } from "../theme/typography";
 import { Checkmark } from "./Checkmark";
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export function BookRow({ book, saving, error, onToggle }: Props) {
+  const styles = useThemedStyles(makeStyles);
   const status = saving ? "saving" : book.read ? "read" : "unread";
   return (
     <View style={styles.row} testID={`book-${book.id}`}>
@@ -49,7 +51,8 @@ export function BookRow({ book, saving, error, onToggle }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) =>
+  StyleSheet.create({
   row: { borderTopWidth: 1, borderTopColor: colors.line, paddingBottom: spacing.xs },
   main: { flexDirection: "row", alignItems: "center", gap: spacing.md, minHeight: touchTarget + 12, paddingVertical: spacing.sm },
   pressed: { opacity: 0.7 },

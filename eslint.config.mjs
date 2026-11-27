@@ -41,7 +41,7 @@ export default tseslint.config(
     rules: { "jsx-a11y/label-has-associated-control": ["error", { assert: "either", depth: 4 }] },
   },
   {
-    files: ["apps/mobile/__tests__/**", "e2e/**"],
+    files: ["apps/mobile/__tests__/**", "apps/mobile/jest.setup.tsx", "e2e/**"],
     languageOptions: { globals: { ...globals.jest } },
     rules: { "@typescript-eslint/no-require-imports": "off", "no-empty-pattern": "off", "react-hooks/rules-of-hooks": "off" },
   },

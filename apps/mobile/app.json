@@ -5,19 +5,47 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "backgroundColor": "#FBF6EC",
+    "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "org.example.readingchallenge",
       "infoPlist": {
-        "NSAppTransportSecurity": { "NSAllowsLocalNetworking": true, "NSAllowsArbitraryLoads": true }
+        "NSAppTransportSecurity": {
+          "NSAllowsLocalNetworking": true,
+          "NSAllowsArbitraryLoads": true
+        }
       }
     },
     "android": {
       "package": "org.example.readingchallenge",
-      "adaptiveIcon": { "foregroundImage": "./assets/icon.png", "backgroundColor": "#1D1B16" }
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#1D1B16"
+      }
     },
-    "plugins": [["expo-video", { "supportsBackgroundPlayback": false, "supportsPictureInPicture": false }]]
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 160,
+          "resizeMode": "contain",
+          "backgroundColor": "#FBF6EC",
+          "dark": {
+            "image": "./assets/splash-icon.png",
+            "backgroundColor": "#15130F"
+          }
+        }
+      ],
+      [
+        "expo-video",
+        {
+          "supportsBackgroundPlayback": false,
+          "supportsPictureInPicture": false
+        }
+      ]
+    ],
+    "scheme": "readingchallenge"
   }
 }

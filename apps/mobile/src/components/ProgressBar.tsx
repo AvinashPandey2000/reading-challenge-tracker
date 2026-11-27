@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import { Animated, StyleSheet, View } from "react-native";
-import { colors } from "../theme/colors";
+import type { Colors } from "../theme/colors";
+import { useTheme, useThemedStyles } from "../theme/ThemeProvider";
 import { radius } from "../theme/spacing";
 import { motion, useReducedMotion } from "../theme/motion";
 
 /** Decorative bar; the count text next to it carries the information. */
 export function ProgressBar({ value, max }: { value: number; max: number }) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const ratio = max > 0 ? value / max : 0;
   const reduced = useReducedMotion();
   const [anim] = useState(() => new Animated.Value(ratio));
@@ -24,7 +27,7 @@ export function ProgressBar({ value, max }: { value: number; max: number }) {
       <Animated.View
         style={[
           styles.fill,
-          { backgroundColor: complete ? colors.green : colors.mangoBar },
+          { backgroundColor: complete ? colors.greenFill : colors.mangoBar },
           { width: anim.interpolate({ inputRange: [0, 1], outputRange: ["0%", "100%"] }) },
         ]}
       />
@@ -32,7 +35,8 @@ export function ProgressBar({ value, max }: { value: number; max: number }) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) =>
+  StyleSheet.create({
   track: {
     height: 10,
     borderRadius: radius.pill,

@@ -1,29 +1,10 @@
-import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react-native";
+import { act, fireEvent, screen, waitFor, within } from "@testing-library/react-native";
 import { ChallengeScreen } from "../src/screens/ChallengeScreen";
+import { VideoScreen } from "../src/screens/VideoScreen";
+import { RewardsScreen } from "../src/screens/RewardsScreen";
+import { renderWithProviders } from "./renderWithProviders";
 import { freshLists, json, mockFetch, patchOk, progressRoutes } from "./helpers";
 import { MockPlayer, players } from "./mockPlayer";
-
-jest.mock("expo-video", () => {
-  const { View } = jest.requireActual("react-native");
-  const { MockPlayer, players } = jest.requireActual("./mockPlayer");
-  return {
-    useVideoPlayer: (_src: string, setup?: (p: unknown) => void) => {
-      const React = jest.requireActual("react");
-      const ref = React.useRef(null);
-      if (!ref.current) {
-        ref.current = new MockPlayer();
-        setup?.(ref.current);
-        players.push(ref.current);
-      }
-      return ref.current;
-    },
-    VideoView: (props: object) => <View testID="video-view" {...props} />,
-  };
-});
-jest.mock("react-native-safe-area-context", () => {
-  const { View } = jest.requireActual("react-native");
-  return { SafeAreaView: View, SafeAreaProvider: View };
-});
 
 const checkbox = (name: RegExp) => screen.getByRole("checkbox", { name });
 
@@ -35,7 +16,7 @@ describe("ChallengeScreen", () => {
   it("loads both lists from the backend: three unread books each, 0 of 3", async () => {
     let release!: () => void;
     mockFetch({ "GET /api/books": () => new Promise<Response>((r) => (release = () => r(json(freshLists())))), ...progressRoutes() });
-    await render(<ChallengeScreen />);
+    await renderWithProviders(<ChallengeScreen />);
     expect(screen.getByText("Loading your reading lists…")).toBeOnTheScreen();
     await act(async () => release());
     expect(await screen.findByTestId("count-fiction")).toHaveTextContent("0 of 3 read");
@@ -48,7 +29,7 @@ describe("ChallengeScreen", () => {
   it("marks a book read; the row and only its list count update together", async () => {
     const lists = freshLists();
     mockFetch({ "GET /api/books": () => json(lists), "PATCH /api/books/matilda": patchOk(lists, 1), ...progressRoutes() });
-    await render(<ChallengeScreen />);
+    await renderWithProviders(<ChallengeScreen />);
     await fireEvent.press(await screen.findByTestId("toggle-matilda"));
     await waitFor(() => expect(checkbox(/Matilda/)).toBeChecked());
     expect(screen.getByTestId("count-fiction")).toHaveTextContent("1 of 3 read");
@@ -69,7 +50,7 @@ describe("ChallengeScreen", () => {
       },
       ...progressRoutes(),
     });
-    await render(<ChallengeScreen />);
+    await renderWithProviders(<ChallengeScreen />);
     await fireEvent.press(await screen.findByTestId("toggle-matilda"));
     expect(checkbox(/Matilda/)).not.toBeChecked();
     expect(checkbox(/Matilda/)).toBeBusy();
@@ -91,7 +72,7 @@ describe("ChallengeScreen", () => {
   it("shows a load error and recovers", async () => {
     let calls = 0;
     mockFetch({ "GET /api/books": () => (++calls === 1 ? json({ error: { code: "X", message: "x" } }, 503) : json(freshLists())), ...progressRoutes() });
-    await render(<ChallengeScreen />);
+    await renderWithProviders(<ChallengeScreen />);
     expect(await screen.findByText("Couldn't load your reading lists. Check your connection and try again.")).toBeOnTheScreen();
     await fireEvent.press(screen.getByRole("button", { name: "Try again" }));
     expect(await screen.findByTestId("count-fiction")).toHaveTextContent("0 of 3 read");
@@ -101,7 +82,13 @@ describe("ChallengeScreen", () => {
 describe("WelcomeVideo on mobile", () => {
   const setup = async (saved: number, extra: Record<string, any> = {}) => {
     const fetchMock = mockFetch({ "GET /api/books": () => json(freshLists()), ...progressRoutes(saved), ...extra });
-    await render(<ChallengeScreen />);
+    const lists = await renderWithProviders(
+      <>
+        <ChallengeScreen />
+        <VideoScreen />
+      </>,
+    );
+    void lists;
     await screen.findByTestId("count-fiction");
     const player = players[0] as MockPlayer;
     return { player, fetchMock, puts: () => fetchMock.mock.calls.filter(([, i]) => i?.method === "PUT").map(([, i]) => JSON.parse(String(i!.body)).positionSeconds) };
@@ -158,5 +145,46 @@ describe("WelcomeVideo on mobile", () => {
     expect(screen.getByRole("button", { name: "Play welcome video" })).toBeDisabled();
     await fireEvent.press(screen.getByTestId("toggle-the-hobbit"));
     await waitFor(() => expect(screen.getByTestId("count-fiction")).toHaveTextContent("1 of 3 read"));
+  });
+});
+
+describe("Rewards tab", () => {
+  it("unlocks the Fiction bookmark when the last fiction book is saved, and announces it", async () => {
+    const lists = freshLists();
+    lists.lists[0]!.readCount = 2;
+    lists.lists[0]!.books[0]!.read = true;
+    lists.lists[0]!.books[1]!.read = true;
+    mockFetch({ "GET /api/books": () => json(lists), "PATCH /api/books/the-secret-garden": patchOk(lists, 3), ...progressRoutes() });
+    const { AccessibilityInfo } = jest.requireActual("react-native");
+    const announce = jest.spyOn(AccessibilityInfo, "announceForAccessibility");
+    await renderWithProviders(
+      <>
+        <ChallengeScreen />
+        <RewardsScreen />
+      </>,
+    );
+    expect(await screen.findByLabelText(/Fiction bookmark\. Locked\. 2 of 3 read/)).toBeOnTheScreen();
+    await fireEvent.press(screen.getByTestId("toggle-the-secret-garden"));
+    expect(await screen.findByLabelText(/Fiction bookmark\. Unlocked\. 3 of 3 read/)).toBeOnTheScreen();
+    expect(announce).toHaveBeenLastCalledWith("The Secret Garden marked as read. Fiction: 3 of 3 read. Reward unlocked: Fiction bookmark.");
+    expect(screen.getByLabelText(/Lantern Lane tote bag\. Locked/)).toBeOnTheScreen();
+  });
+
+  it("shows the offer banner with the shared deadline copy", async () => {
+    mockFetch({ "GET /api/books": () => json(freshLists()), ...progressRoutes() });
+    await renderWithProviders(<RewardsScreen />);
+    expect(screen.getByText("Finish both lists by 31 January 2027 and your late fees are waived.")).toBeOnTheScreen();
+    expect(screen.getByText("Demo offer — Lantern Lane is a fictional library.")).toBeOnTheScreen();
+  });
+
+  it("switches appearance and remembers the choice", async () => {
+    const AsyncStorage = require("@react-native-async-storage/async-storage");
+    mockFetch({ "GET /api/books": () => json(freshLists()), ...progressRoutes() });
+    await renderWithProviders(<RewardsScreen />);
+    await fireEvent.press(screen.getByRole("radio", { name: "Dark appearance" }));
+    expect(screen.getByRole("radio", { name: "Dark appearance" })).toBeSelected();
+    await waitFor(async () => expect(await AsyncStorage.getItem("rct.theme")).toBe("dark"));
+    await fireEvent.press(screen.getByRole("radio", { name: "System appearance" }));
+    await waitFor(async () => expect(await AsyncStorage.getItem("rct.theme")).toBeNull());
   });
 });

@@ -1,5 +1,6 @@
 import { StyleSheet, Text } from "react-native";
-import { colors } from "../theme/colors";
+import type { Colors } from "../theme/colors";
+import { useThemedStyles } from "../theme/ThemeProvider";
 import { radius, spacing } from "../theme/spacing";
 import { type } from "../theme/typography";
 
@@ -8,10 +9,12 @@ export type BookStatus = "read" | "unread" | "saving";
 const LABEL: Record<BookStatus, string> = { read: "✓ Read", unread: "Not read yet", saving: "Saving…" };
 
 export function StatusPill({ status }: { status: BookStatus }) {
+  const styles = useThemedStyles(makeStyles);
   return <Text style={[styles.pill, styles[status]]}>{LABEL[status]}</Text>;
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) =>
+  StyleSheet.create({
   pill: {
     ...type.caption,
     fontWeight: "700",

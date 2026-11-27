@@ -7,6 +7,12 @@ A small full-stack app for the **Lantern Lane Library** (a fictional library) re
 - **Mobile**: Expo SDK 58 (React Native 0.88) for iOS and Android, using the same backend and the same demo reader
 - **Docker**: one multi-stage image that runs the web app and the API in **one container**, with SQLite on a volume
 
+Extras on top of the assignment:
+- **Library rewards and offer**: a bookmark for each finished list, a free tote bag with a claim code for finishing both, and a "late fees waived" deadline banner. Rewards are derived from saved progress by one shared function used by the API (`GET /api/rewards`), the web app and Expo. The offer is labelled as a demo from a fictional library.
+- **Light and dark mode** on web and mobile: follows the system by default, with a remembered System / Light / Dark choice. The web app applies it before first paint, so there is no flash.
+- **Glass surfaces**: translucent, blurred cards and a floating glass header over soft colour bubbles on web; Apple's Liquid Glass (`expo-glass-effect`) on iOS 26 with blur and solid fallbacks elsewhere. All fall back to solid surfaces under *Reduce transparency* or *Increase contrast*.
+- **Mobile navigation**: native splash screen, a three-slide intro shown once (with Skip), and a system bottom tab bar (Challenge · Video · Rewards) that uses Liquid Glass on iOS 26.
+
 ## Quick start (one command)
 
 ```bash
@@ -30,7 +36,7 @@ Open **http://localhost:3000**. The first build takes about 2 minutes. Data pers
    npm ci
    npm run mobile
    ```
-   Press `i` for the iOS simulator or `a` for the Android emulator, or scan the QR code with Expo Go on a phone. The app shows Fiction **1 of 3** with Matilda read, and the video offers to resume at 0:12. Toggle a book in Expo and refresh the web page: the change is there too. See [Expo and the API URL](#expo-and-the-api-url) if the app can't reach the backend.
+   Press `i` for the iOS simulator or `a` for the Android emulator, or scan the QR code with Expo Go on a phone. On first launch, tap **Skip** on the intro. The Challenge tab shows Fiction **1 of 3** with Matilda read, and the Video tab offers to resume at 0:12. Toggle a book in Expo and refresh the web page: the change is there too. See [Expo and the API URL](#expo-and-the-api-url) if the app can't reach the backend.
 
 ## Prerequisites
 
@@ -87,17 +93,17 @@ npm test               # shared + API + web + Expo unit/integration tests
 npx playwright install chromium   # once
 npm run test:e2e       # Playwright E2E against the production build (needs ports 3100 and 4000 free)
 npm run docker:smoke   # builds the image and checks persistence across container recreation
-npm run check:contrast # WCAG contrast ratios for the palette
+npm run check:contrast # WCAG contrast for light, dark and text-on-glass
 ```
 
 | Suite | Where | What it covers |
 | --- | --- | --- |
-| Shared (Vitest, 9) | `packages/shared/src/bookState.test.ts` | Save state machine: pending keeps the confirmed value, duplicate in-flight saves are ignored, row and count update together, failures are retryable. Schema rejects `null`, `0`, `1`, `"false"` and extra keys. |
-| API integration (Vitest, 27) | `apps/api/test/*.test.ts` | Runs `fastify.inject` against a **temporary SQLite file per test**. Fresh DB: 2 lists, 3 unread books each, 0 of 3. Read/unread, a repeated identical PATCH, independent counts, 404 for an unknown ID, 400 for missing/`null`/`0`/`1`/`"false"`/`"true"`/array/extra keys/malformed JSON, the error shape, `no-store`, restart persistence, seeding never overwriting saved data, and video progress including seeking backward and invalid values. |
-| Web components (Vitest + Testing Library, 10) | `apps/web/test/*.test.tsx` | Loading state; initial load failure and Retry; saving keeps the confirmed value and count; duplicate clicks; other books stay usable; failure message and Retry; keyboard Space; video resume applied only after both metadata and fetch, never saving 0; saving on pause, including after seeking backward; save failure and retry; load vs playback failure. |
-| Expo components (jest-expo + RNTL, 8) | `apps/mobile/__tests__` | The same list behaviours on React Native with accessibility roles and states (checkbox, checked, busy); video resume without autoplay; saving on pause and rewind; save, load and playback failures; lists still usable when the video fails. |
-| E2E (Playwright, 27 + 1 skipped) | `e2e/*.spec.ts` | Real production build and real API on a fresh temp DB per test. Fresh 0 of 3; Matilda read, refresh, unread; keyboard-only with a visible focus ring; failed save via a routed 500 and Retry; load failure and recovery; **an actual API process restart**; a cross-client update through the API (the path Expo uses); **play, seek to 12 s, pause, refresh, Play resumes near 12 s**; seeking backward; video load, playback and save failures; desktop side-by-side and Pixel 7 stacked layout; touch targets; accessible names; reduced motion (0 s transitions); 150–220 ms default motion; rendered SEO tags; OG image size and type; robots and sitemap; PDF download (`%PDF-`). The skipped test is the desktop-only layout check in the mobile project. |
-| Docker smoke | `scripts/docker-smoke.sh` | Builds the image, runs one container, saves Matilda and 12.3 s, stops it (SIGTERM exit 0), **removes it, starts a new container on the same volume**, and checks both values plus the HTML, OG image, robots, sitemap, PDF, video range requests and `no-store`. |
+| Shared (Vitest, 17) | `packages/shared/src/*.test.ts` | Save state machine: pending keeps the confirmed value, duplicate in-flight saves are ignored, row and count update together, failures are retryable, and a save that completes a list announces the reward. Schema rejects `null`, `0`, `1`, `"false"` and extra keys. Rewards: thresholds, a stable claim code, no tote unless both lists are present, the offer's day count and ended state. |
+| API integration (Vitest, 30) | `apps/api/test/*.test.ts` | Runs `fastify.inject` against a **temporary SQLite file per test**. Fresh DB: 2 lists, 3 unread books each, 0 of 3. Read/unread, a repeated identical PATCH, independent counts, 404 for an unknown ID, 400 for missing/`null`/`0`/`1`/`"false"`/`"true"`/array/extra keys/malformed JSON, the error shape, `no-store`, restart persistence, seeding never overwriting saved data, video progress including seeking backward and invalid values, and `GET /api/rewards` (all locked on a fresh DB, Fiction-only unlock, the tote claim code, re-locking after un-reading). |
+| Web components (Vitest + Testing Library, 15) | `apps/web/test/*.test.tsx` | Loading state; initial load failure and Retry; saving keeps the confirmed value and count; duplicate clicks; other books stay usable; failure message and Retry; keyboard Space; video resume applied only after both metadata and fetch, never saving 0; saving on pause, including after seeking backward; save failure and retry; load vs playback failure; the theme toggle (radio group, arrow keys, `data-theme`, remembered choice); the offer banner with a fixed clock (days left and ended); a reward unlock and its announcement. |
+| Expo (jest-expo + RNTL, 14) | `apps/mobile/__tests__` | The same list behaviours on React Native with accessibility roles and states (checkbox, checked, busy); video resume without autoplay; saving on pause and rewind; save, load and playback failures; lists still usable when the video fails. Also: reward unlock and announcement, the offer banner, the appearance setting saved to storage, and the **real expo-router tree**: the intro on first launch, Skip, Next → Get started, and no intro once seen. |
+| E2E (Playwright, 35 + 1 skipped) | `e2e/*.spec.ts` | Real production build and real API on a fresh temp DB per test. Fresh 0 of 3; Matilda read, refresh, unread; keyboard-only with a visible focus ring; failed save via a routed 500 and Retry; load failure and recovery; **an actual API process restart**; a cross-client update through the API (the path Expo uses); **play, seek to 12 s, pause, refresh, Play resumes near 12 s**; seeking backward; video load, playback and save failures; desktop side-by-side and Pixel 7 stacked layout; touch targets; accessible names; reduced motion (0 s transitions); 150–220 ms default motion; rendered SEO tags; OG image size and type; robots and sitemap; PDF download (`%PDF-`); system dark mode; a manual theme choice surviving a reload even with JavaScript blocked (no flash); backdrop blur on the glass header and cards, with a sticky header; the offer banner; Fiction completion unlocking the bookmark; and all six books unlocking the tote with the same claim code as `GET /api/rewards`. The skipped test is the desktop-only layout check in the mobile project. |
+| Docker smoke | `scripts/docker-smoke.sh` | Builds the image, runs one container, saves Matilda and 12.3 s, stops it (SIGTERM exit 0), **removes it, starts a new container on the same volume**, and checks both values plus `/api/rewards`, the HTML, OG image, robots, sitemap, PDF, video range requests and `no-store`. |
 
 The E2E suite plays the app's own local clip, so it never depends on a third-party media host. Chromium uses the WebM source, and Safari and iOS use the MP4.
 
@@ -112,6 +118,7 @@ All responses are JSON with `Cache-Control: no-store`. Errors always look like `
 | `PATCH /api/books/:id` | `{"read": true}` or `{"read": false}` | `{"book":{…},"list":{"id","title","readCount","total"},"message":"Matilda marked as read. Fiction: 1 of 3 read."}` | 404 `BOOK_NOT_FOUND`; 400 `INVALID_STATUS` (missing, `null`, `0`, `1`, `"false"`, other keys); 400 `INVALID_JSON` |
 | `GET /api/video-progress` | — | `{"positionSeconds":12.4,"updatedAt":"…"}` (0 and `null` when nothing is saved) | — |
 | `PUT /api/video-progress` | `{"positionSeconds": 12.4}` (a finite number from 0 to 21600) | The saved value | 400 `INVALID_POSITION` |
+| `GET /api/rewards` | — | `{"rewards":[{"id":"fiction-bookmark","title","description","current":3,"total":3,"unlocked":true,"claimCode":null}, …, {"id":"challenge-tote",…,"claimCode":"LANTERN-XXXX"}],"offer":{"endsAt":"2027-01-31T23:59:59Z","daysLeft":66,"ended":false}}` | — |
 
 PATCH is idempotent: sending the same status twice returns the same status and count and doesn't change `updatedAt`. An unknown ID returns 404 before the body is validated.
 
@@ -195,22 +202,34 @@ After deploying, check on the live URL that a book toggle survives a refresh and
 | Sample PDF | `public/downloads/the-secret-garden-chapter-1.pdf` (public-domain text) | E2E PDF download; Docker smoke |
 | Docker bonus: one image, one container | `Dockerfile`, `docker/start.mjs`, `compose.yaml` | `scripts/docker-smoke.sh` |
 | Expo parity, same reader and backend | `apps/mobile` | Expo tests; manual run on the iOS simulator (below) |
+| *Extra:* rewards and offer | `packages/shared/src/rewards.ts`, `GET /api/rewards`, web `Rewards`/`OfferBanner`, Expo Rewards tab | Shared, API, web, Expo and E2E reward tests |
+| *Extra:* light/dark mode | Web `light-dark()` tokens + `ThemeToggle` + inline head script; Expo `ThemeProvider` | Web and Expo theme tests; E2E dark mode and no-flash reload; contrast check for both palettes |
+| *Extra:* glass surfaces | Web `.glass` utility + `.bubbles`; Expo `GlassSurface` (Liquid Glass → blur → solid) | E2E backdrop-filter check; contrast for text on glass; simulator screenshots |
+| *Extra:* splash, intro, bottom tabs | `app.json` splash plugin; `app/onboarding.tsx`; `app/(tabs)/_layout.tsx` (native tabs) | Expo router tests; simulator run |
 
 ## Verification log
 
 **Automated checks that ran and passed** (Node 25.2, macOS, Docker 29):
 - `npm run lint`, `npm run typecheck` and `npm run build`
-- `npm test`: 9 shared + 27 API + 10 web + 8 Expo = 54 tests
-- `npm run test:e2e`: 27 passed and 1 skipped by design, on desktop Chrome and Pixel 7 profiles
+- `npm test`: 17 shared + 30 API + 15 web + 14 Expo = 76 tests
+- `npm run test:e2e`: 35 passed and 1 skipped by design, on desktop Chrome and Pixel 7 profiles
 - `npm run docker:smoke`: all checks passed, including persistence after `docker rm` and recreation on the same volume
-- `npm run check:contrast`: all 17 pairs pass. Text is at least 4.5:1; UI parts, focus and the progress fill are at least 3:1.
+- `npm run check:contrast`: all 70 pairs pass across the light and dark palettes, including body, muted and mango text on glass over the brightest background bubble. Text is at least 4.5:1; UI parts, focus and the progress fill are at least 3:1.
 
 **Manual checks performed:**
 - In a browser against the dev server: marked Matilda read, refreshed and saw 1 of 3 / 0 of 3; played, sought to 12.7 s, paused, refreshed, pressed Play, and playback continued from 12.7 s.
 - **Web → Expo on the iOS simulator** (iPhone 17, iOS 26.2, Expo Go) against `docker compose up`: Matilda and 12.4 s were saved through the API. The Expo app showed Fiction 1 of 3 with Matilda read and *Press Play to pick up at 0:12*. Tapping *The Hobbit* in Expo updated the backend (Fiction 2 of 3). Pressing Play played from 12.4 s, and Pause saved 15.4 s.
+- **New mobile features on the iOS simulator** (iPhone 17, iOS 26.2, Expo Go, against `npm run dev`):
+  - The intro appeared on first launch, and Next → Next → Get started opened the tabs.
+  - The system tab bar and cards rendered with Liquid Glass.
+  - The Rewards tab matched the web (Fiction bookmark unlocked after finishing Fiction on the web).
+  - Switching the simulator to dark mode re-themed the app. Choosing *Light* in Settings overrode the dark system setting.
+  - After a relaunch, there was no intro and Light was still selected.
+- **New web features in the browser:** System mode followed a dark OS theme; the toggle switched to Light; the glass header stayed sticky while scrolling; finishing Fiction unlocked the bookmark and the live region announced it, and `/api/rewards` agreed.
 
 **Not verified here:**
-- A physical phone and the Android emulator, which need a device.
+- A physical phone and the Android emulator, which need a device. On Android, the glass cards are translucent tinted surfaces rather than real blur, and that path hasn't been seen on a device.
+- The **custom splash screen**. Expo Go shows its own launch screen, so the app's splash (icon on ivory, or charcoal in dark mode) only appears in a development or production build (`npx expo run:ios` or EAS), which wasn't built here.
 - The GitHub push and a live deployment, which need credentials; no live URL exists.
 - Screen-reader output with VoiceOver or TalkBack. Roles, names, states and live regions are asserted in tests, but no screen reader was used.
 
@@ -227,5 +246,7 @@ This project was built with an AI coding assistant (Claude). It helped with the 
 - The Expo video uses app-level controls (Play/Pause, ±10 s) instead of native controls, so the save-on-pause logic is reliable. A free-drag scrubber is web-only.
 - The web player has a captions track describing non-speech audio (the clip has no dialogue). The Expo player has none.
 - `node:sqlite` still prints an ExperimentalWarning on Node 22–25. The container suppresses it.
-- `npm audit` reports 3 moderate advisories in Expo's development-only tooling (`@expo/fingerprint` → `minimatch`). They aren't part of the Docker image, and the suggested "fix" downgrades Expo.
+- `npm audit` reports 22 moderate advisories, all in development tooling (Jest, `jest-expo` and Expo CLI's `@expo/fingerprint`, through `glob`/`minimatch`). None are in the Docker image's dependencies, and the suggested "fix" downgrades Expo.
+- The offer and rewards are a demo: the deadline is a constant in `packages/shared/src/rewards.ts`, and claim codes are deterministic per reader. Nobody verifies a code at a front desk.
+- Liquid Glass needs iOS 26. Earlier iOS versions get a system blur, and *Reduce transparency* gets solid cards.
 - The fonts are fetched from Google Fonts at build time (`next/font`), so `docker build` needs network access.

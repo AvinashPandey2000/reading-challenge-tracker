@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { Animated, StyleSheet, Text, View } from "react-native";
-import { colors } from "../theme/colors";
+import type { Colors } from "../theme/colors";
+import { useThemedStyles } from "../theme/ThemeProvider";
 import { motion, useReducedMotion } from "../theme/motion";
 
 /** Checkbox visual with a brief (180 ms) scale-in when a save confirms "read". */
 export function Checkmark({ checked }: { checked: boolean }) {
+  const styles = useThemedStyles(makeStyles);
   const reduced = useReducedMotion();
   const [scale] = useState(() => new Animated.Value(checked ? 1 : 0));
   useEffect(() => {
@@ -22,7 +24,8 @@ export function Checkmark({ checked }: { checked: boolean }) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) =>
+  StyleSheet.create({
   box: {
     width: 28,
     height: 28,
@@ -33,6 +36,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  boxChecked: { backgroundColor: colors.green, borderColor: colors.green },
+  boxChecked: { backgroundColor: colors.greenFill, borderColor: colors.greenFill },
   tick: { color: colors.white, fontSize: 17, fontWeight: "800", lineHeight: 20 },
 });

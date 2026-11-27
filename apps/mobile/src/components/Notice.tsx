@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View } from "react-native";
-import { colors } from "../theme/colors";
+import type { Colors } from "../theme/colors";
+import { useThemedStyles } from "../theme/ThemeProvider";
 import { radius, spacing } from "../theme/spacing";
 import { type } from "../theme/typography";
 import { Button } from "./Button";
@@ -15,6 +16,7 @@ interface Props {
 
 /** Inline message with an optional action. Errors are announced as alerts. */
 export function Notice({ tone = "error", message, actionLabel, actionAccessibilityLabel, onAction, testID }: Props) {
+  const styles = useThemedStyles(makeStyles);
   const toneStyle = tone === "error" ? styles.error : tone === "warning" ? styles.warning : styles.info;
   const textStyle = tone === "error" ? styles.errorText : tone === "warning" ? styles.warningText : styles.infoText;
   return (
@@ -32,7 +34,8 @@ export function Notice({ tone = "error", message, actionLabel, actionAccessibili
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) =>
+  StyleSheet.create({
   box: {
     flexDirection: "row",
     alignItems: "center",

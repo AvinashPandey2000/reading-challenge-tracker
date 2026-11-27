@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Text, type PressableProps, type StyleProp, type ViewStyle } from "react-native";
-import { colors } from "../theme/colors";
+import type { Colors } from "../theme/colors";
+import { useThemedStyles } from "../theme/ThemeProvider";
 import { radius, spacing, touchTarget } from "../theme/spacing";
 import { type } from "../theme/typography";
 
@@ -12,6 +13,7 @@ interface Props extends Omit<PressableProps, "style" | "children"> {
 }
 
 export function Button({ label, variant = "primary", style, disabled, accessibilityLabel, ...rest }: Props) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <Pressable
       accessibilityRole="button"
@@ -29,7 +31,8 @@ export function Button({ label, variant = "primary", style, disabled, accessibil
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) =>
+  StyleSheet.create({
   base: {
     minHeight: touchTarget,
     minWidth: touchTarget,
@@ -44,7 +47,7 @@ const styles = StyleSheet.create({
   pressed: { opacity: 0.8 },
   disabled: { opacity: 0.5 },
   label: type.label,
-  labelPrimary: { color: colors.surface },
+  labelPrimary: { color: colors.onInk },
   labelOutline: { color: colors.ink },
   labelDanger: { color: colors.danger },
 });

@@ -75,6 +75,7 @@ assert d["fiction"]["readCount"]==1 and d["nonfiction"]["readCount"]==0, d
 assert [b for b in d["fiction"]["books"] if b["id"]=="matilda"][0]["read"] is True
 ' && pass "book status survived: Fiction 1 of 3, Nonfiction 0 of 3"
 curl -sf "$BASE/api/video-progress" | grep -q '"positionSeconds":12.3' && pass "video position survived: 12.3 s" || fail "video position lost"
+curl -sf "$BASE/api/rewards" | grep -q '"id":"challenge-tote"' && pass "rewards endpoint served through the public port" || fail "rewards endpoint"
 
 html=$(curl -sf "$BASE/")
 echo "$html" | grep -q '<title>Your reading challenge · Lantern Lane Library</title>' && pass "page renders with title"

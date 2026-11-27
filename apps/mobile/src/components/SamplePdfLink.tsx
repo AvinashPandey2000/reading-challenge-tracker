@@ -1,12 +1,15 @@
-import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
+import { Linking, Pressable, StyleSheet, Text } from "react-native";
 import { SAMPLE_PDF_URL } from "../lib/config";
-import { colors } from "../theme/colors";
+import { GlassSurface } from "./GlassSurface";
+import type { Colors } from "../theme/colors";
+import { useThemedStyles } from "../theme/ThemeProvider";
 import { radius, spacing, touchTarget } from "../theme/spacing";
 import { type } from "../theme/typography";
 
 export function SamplePdfLink() {
+  const styles = useThemedStyles(makeStyles);
   return (
-    <View style={styles.card}>
+    <GlassSurface style={styles.card}>
       <Text style={styles.heading} accessibilityRole="header">
         Free sample to read
       </Text>
@@ -22,12 +25,13 @@ export function SamplePdfLink() {
         <Text style={styles.linkText}>↓ Download sample PDF</Text>
         <Text style={styles.meta}>The Secret Garden — Chapter I · PDF · 6 pages · 12 KB</Text>
       </Pressable>
-    </View>
+    </GlassSurface>
   );
 }
 
-const styles = StyleSheet.create({
-  card: { backgroundColor: colors.surfaceSunk, borderRadius: radius.md, padding: spacing.lg, gap: spacing.sm },
+const makeStyles = (colors: Colors) =>
+  StyleSheet.create({
+  card: { padding: spacing.lg, gap: spacing.sm },
   heading: { ...type.heading, color: colors.ink },
   text: { ...type.caption, color: colors.inkMuted },
   link: {
