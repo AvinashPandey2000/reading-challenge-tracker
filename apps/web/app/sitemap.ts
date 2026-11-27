@@ -3,5 +3,8 @@ import { SITE_URL } from "@/lib/site";
 
 /** Only the public page. API routes are deliberately excluded. */
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [{ url: `${SITE_URL}/`, changeFrequency: "monthly", priority: 1 }];
+  return [
+    { url: `${SITE_URL}/`, changeFrequency: "monthly", priority: 1 },
+    { url: `${SITE_URL}/library`, changeFrequency: "monthly", priority: 0.8 },
+  ];
 }

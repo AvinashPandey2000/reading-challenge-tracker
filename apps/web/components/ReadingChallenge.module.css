@@ -264,3 +264,22 @@
   height: 44px;
   margin-top: 0.75rem;
 }
+
+.detailsLink {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin-right: -0.4rem;
+  border-radius: 50%;
+  color: var(--ink-muted);
+}
+.detailsLink:hover {
+  background: var(--surface-sunk);
+  color: var(--ink);
+}
+.detailsLink svg {
+  width: 18px;
+  height: 18px;
+}

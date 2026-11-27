@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { ReadingList, SaveError } from "@rct/shared";
 import { formatCount } from "@rct/shared";
 import styles from "./ReadingChallenge.module.css";
@@ -75,6 +76,11 @@ export function BookList({ list, pending, errors, onToggle }: Props) {
                 <span id={statusId} className={styles.status} data-state={saving ? "saving" : book.read ? "read" : "unread"}>
                   {saving ? "Saving…" : book.read ? "✓ Read" : "Not read yet"}
                 </span>
+                <Link href={`/books/${book.id}`} className={styles.detailsLink} aria-label={`${book.title}: details and reading`}>
+                  <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                    <path d="M7.5 4.5 13 10l-5.5 5.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </Link>
               </div>
               {error && !saving && (
                 <div className={styles.rowError} role="alert">

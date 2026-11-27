@@ -112,3 +112,16 @@
     align-items: start;
   }
 }
+
+.backLink {
+  justify-self: start;
+  color: var(--ink-muted);
+  font-weight: 600;
+  text-decoration: none;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.backLink:hover {
+  color: var(--ink);
+}
