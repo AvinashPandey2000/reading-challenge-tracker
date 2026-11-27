@@ -50,3 +50,23 @@
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
 }
+/* Narrow phones: slimmer options so the header fits without sideways scrolling (targets stay well above 24px). */
+@media (max-width: 440px) {
+  .group {
+    padding: 2px;
+    gap: 0;
+  }
+  .face {
+    width: 34px;
+    height: 40px;
+  }
+  .icon {
+    width: 18px;
+    height: 18px;
+  }
+}
+@media (max-width: 340px) {
+  .face {
+    width: 30px;
+  }
+}

@@ -112,3 +112,23 @@
     display: inline;
   }
 }
+/* Narrow phones: tighter gutter and nav padding so brand, nav and theme fit in 320–440px. */
+@media (max-width: 440px) {
+  .siteHeader .headerBar {
+    --gutter: 0.75rem;
+    gap: 0.25rem;
+  }
+  .nav {
+    gap: 0;
+  }
+  .navLink {
+    padding: 0 0.5rem;
+    font-size: 0.9rem;
+  }
+}
+@media (max-width: 340px) {
+  .navLink {
+    padding: 0 0.35rem;
+    font-size: 0.85rem;
+  }
+}

@@ -9,6 +9,8 @@ const apiInternalUrl = process.env.API_INTERNAL_URL ?? "http://127.0.0.1:4000";
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  // Lets a second build (e.g. the demo recording) live beside `next dev` without sharing .next/.
+  distDir: process.env.NEXT_DIST_DIR ?? ".next",
   outputFileTracingRoot: new URL("../..", import.meta.url).pathname,
   transpilePackages: ["@rct/shared"],
   poweredByHeader: false,
