@@ -17,3 +17,4 @@ apps/mobile/android/
 *.tsbuildinfo
 .DS_Store
 .tmp/
+.claude/
