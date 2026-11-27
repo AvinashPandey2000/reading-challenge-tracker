@@ -1,18 +1,67 @@
+/*
+ * At the top of the page the header is a full-width bar; as the page scrolls it morphs, step by
+ * step with the scroll, into a floating glass pill. `--p` (0 → 1) is set from the scroll position
+ * in SiteHeader.tsx, so there is no sudden jump. The header's total height stays 72px while it
+ * morphs (10px gap + 62px pill), so the page content below never shifts.
+ *
+ * Where the browser supports CSS scroll-driven animations (Chrome/Edge 115+, Safari 26+), `--p` is
+ * animated by the scroll timeline itself, with no JavaScript; elsewhere (Firefox today) SiteHeader.tsx
+ * sets it from a scroll listener.
+ */
+@property --p {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+@keyframes header-morph {
+  from {
+    --p: 0;
+  }
+  to {
+    --p: 1;
+  }
+}
 .siteHeader {
+  --p: 0;
   position: sticky;
   top: 0;
   z-index: 20;
-  padding: 0.75rem 0.75rem 0;
+  padding: calc(var(--p) * 10px) calc(var(--p) * 0.75rem) 0;
 }
-.headerBar {
-  max-width: 1120px;
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .siteHeader {
+      animation: header-morph linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 72px;
+    }
+  }
+}
+.siteHeader .headerBar {
+  /* Full width at the top; content lines up with the page column (1120px, 1.25rem gutter). */
+  --gutter: max(1.25rem, calc((100vw - 1120px) / 2 + 1.25rem));
+  width: calc(100% + var(--p) * (min(1120px, 100%) - 100%));
   margin: 0 auto;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  min-height: 60px;
-  padding: 0.4rem 0.5rem 0.4rem 0.75rem;
-  border-radius: 999px;
+  min-height: calc(72px - var(--p) * 10px);
+  padding-block: calc(0.5rem - var(--p) * 0.25rem);
+  padding-inline: calc(var(--gutter) * (1 - var(--p)) + var(--p) * 0.75rem)
+    calc(var(--gutter) * (1 - var(--p)) + var(--p) * 0.5rem);
+  border-radius: calc(var(--p) * 30px);
+  border-color: color-mix(in srgb, var(--glass-border) calc(var(--p) * 100%), transparent);
+  border-bottom-color: var(--glass-border);
+  box-shadow:
+    inset 0 1px 0 var(--glass-highlight),
+    inset 0 0 0 1px var(--glass-edge);
+  transition: box-shadow var(--dur-medium) var(--ease-standard);
+}
+.siteHeader[data-scrolled] .headerBar {
+  box-shadow:
+    inset 0 1px 0 var(--glass-highlight),
+    inset 0 0 0 1px var(--glass-edge),
+    var(--glass-shadow);
 }
 .brand {
   display: flex;
