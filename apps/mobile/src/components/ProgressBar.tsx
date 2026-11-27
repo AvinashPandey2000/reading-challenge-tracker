@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import { Animated, StyleSheet, View } from "react-native";
 import { colors } from "../theme/colors";
 import { radius } from "../theme/spacing";
@@ -8,7 +8,7 @@ import { motion, useReducedMotion } from "../theme/motion";
 export function ProgressBar({ value, max }: { value: number; max: number }) {
   const ratio = max > 0 ? value / max : 0;
   const reduced = useReducedMotion();
-  const anim = useRef(new Animated.Value(ratio)).current;
+  const [anim] = useState(() => new Animated.Value(ratio));
 
   useEffect(() => {
     if (reduced) {

@@ -83,7 +83,7 @@ const W = 420, H = 595, M = 48; // A5 portrait
 const ink = rgb(0.11, 0.1, 0.09);
 const mango = rgb(0.64, 0.33, 0);
 const muted = rgb(0.34, 0.31, 0.26);
-const winAnsiSafe = (s) => s.replace(/[^\x20-\x7E -ÿ‘’“”—–…]/g, "");
+const winAnsiSafe = (s) => s.replace(/[^\x20-\x7E\u00A0-\u00FF\u2018\u2019\u201C\u201D\u2014\u2013\u2026]/g, "");
 
 function wrap(text, font, size, width) {
   const words = winAnsiSafe(text).split(/\s+/);

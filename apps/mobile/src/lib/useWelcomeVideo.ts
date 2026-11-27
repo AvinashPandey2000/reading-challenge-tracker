@@ -1,3 +1,6 @@
+/* eslint-disable react-hooks/immutability --
+   expo-video's VideoPlayer is an imperative native object: seeking means assigning
+   player.currentTime, which the React Compiler rule can't distinguish from mutating React state. */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useEventListener } from "expo";
 import { useVideoPlayer, type VideoPlayer } from "expo-video";
@@ -52,8 +55,8 @@ export function useWelcomeVideo(source: string = VIDEO_URL) {
     [player],
   );
 
+  // Initial state is already "loading"; retries flip it back first (see reloadProgress).
   const loadProgress = useCallback(() => {
-    setProgressLoad("loading");
     const promise = api
       .getVideoProgress()
       .then((p) => {
@@ -83,6 +86,8 @@ export function useWelcomeVideo(source: string = VIDEO_URL) {
 
   // The player may already be ready before listeners attach.
   useEffect(() => {
+    // Syncs with an external system (the native player may already be ready).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (player.status === "readyToPlay") markReady();
   }, [markReady, player]);
 
@@ -168,6 +173,9 @@ export function useWelcomeVideo(source: string = VIDEO_URL) {
     seekBy,
     reload,
     retrySave,
-    reloadProgress: loadProgress,
+    reloadProgress: () => {
+      setProgressLoad("loading");
+      return loadProgress();
+    },
   };
 }

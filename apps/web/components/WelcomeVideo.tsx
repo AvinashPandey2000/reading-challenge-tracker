@@ -16,7 +16,7 @@ export function WelcomeVideo() {
   const [duration, setDuration] = useState(0);
   const [problem, setProblem] = useState<MediaProblem>(null);
   const [starting, setStarting] = useState(false);
-  const hasStarted = useRef(false);
+  const [hasStarted, setHasStarted] = useState(false);
 
   const handleMetadata = useCallback(
     (video: HTMLVideoElement) => {
@@ -44,7 +44,7 @@ export function WelcomeVideo() {
     try {
       await progress.prepareForPlay();
       await video.play();
-      hasStarted.current = true;
+      setHasStarted(true);
       setProblem(null);
     } catch (err) {
       // AbortError happens when a pause interrupts play(); not a failure.
@@ -77,12 +77,12 @@ export function WelcomeVideo() {
 
   const onError = () => {
     // Before metadata = the file couldn't be loaded; after = playback broke part-way.
-    setProblem(duration > 0 || hasStarted.current ? "playback" : "load");
+    setProblem(duration > 0 || hasStarted ? "playback" : "load");
     setPlaying(false);
   };
 
   const resumeHint =
-    progress.progressLoad === "ready" && progress.savedPosition > 0 && !hasStarted.current
+    progress.progressLoad === "ready" && progress.savedPosition > 0 && !hasStarted
       ? `Press Play to pick up at ${formatTimestamp(progress.savedPosition)}.`
       : null;
 
@@ -124,6 +124,7 @@ export function WelcomeVideo() {
           {VIDEO.sources.map((s) => (
             <source key={s.src} src={s.src} type={s.type} onError={s === VIDEO.sources.at(-1) ? onError : undefined} />
           ))}
+          <track kind="captions" src="/media/welcome.en.vtt" srcLang="en" label="English" />
         </video>
       </div>
 

@@ -40,8 +40,8 @@ export function useVideoProgress(videoRef: React.RefObject<HTMLVideoElement | nu
     resumeApplied.current = true;
   }, [videoRef]);
 
+  // Initial state is already "loading"; retries flip it back first (see reloadProgress).
   const loadProgress = useCallback(() => {
-    setProgressLoad("loading");
     const p = api
       .getVideoProgress()
       .then((progress) => {
@@ -128,6 +128,9 @@ export function useVideoProgress(videoRef: React.RefObject<HTMLVideoElement | nu
     onPause,
     onSeeked,
     retrySave,
-    reloadProgress: loadProgress,
+    reloadProgress: () => {
+      setProgressLoad("loading");
+      return loadProgress();
+    },
   };
 }

@@ -9,7 +9,7 @@ export function HeroImage() {
   if (failed) return null;
   return (
     <figure className={styles.figure}>
-      {/* eslint-disable-next-line @next/next/no-img-element -- local, pre-optimised WebP with explicit size */}
+      {/* Plain <img>: a local, pre-optimised WebP with explicit size; no image optimiser needed. */}
       <img
         src="/images/reading-room.webp"
         alt=""

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import { Animated, StyleSheet, Text, View } from "react-native";
 import { colors } from "../theme/colors";
 import { motion, useReducedMotion } from "../theme/motion";
@@ -6,7 +6,7 @@ import { motion, useReducedMotion } from "../theme/motion";
 /** Checkbox visual with a brief (180 ms) scale-in when a save confirms "read". */
 export function Checkmark({ checked }: { checked: boolean }) {
   const reduced = useReducedMotion();
-  const scale = useRef(new Animated.Value(checked ? 1 : 0)).current;
+  const [scale] = useState(() => new Animated.Value(checked ? 1 : 0));
   useEffect(() => {
     const to = checked ? 1 : 0;
     if (reduced) scale.setValue(to);

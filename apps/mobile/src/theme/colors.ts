@@ -8,7 +8,7 @@ export const colors = {
   line: "#E4D8C2",
   mango: "#F4A422",
   mangoStrong: "#A35400",
-  mangoBar: "#D97A06",
+  mangoBar: "#C46A00",
   savingBg: "#FDF0DA",
   green: "#2F6B3A",
   greenSoft: "#E3EFE2",
