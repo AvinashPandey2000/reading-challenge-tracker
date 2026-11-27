@@ -1,0 +1,52 @@
+.group {
+  display: inline-flex;
+  gap: 2px;
+  margin: 0;
+  padding: 3px;
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface-sunk) 70%, transparent);
+}
+.option {
+  position: relative;
+  cursor: pointer;
+}
+.input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+}
+.face {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  color: var(--ink-muted);
+  transition: background-color var(--dur-short) var(--ease-standard), color var(--dur-short) var(--ease-standard);
+}
+.option:hover .face {
+  color: var(--ink);
+}
+.input:checked + .face {
+  background: var(--ink);
+  color: var(--on-ink);
+}
+.input:focus-visible + .face {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+.icon {
+  width: 20px;
+  height: 20px;
+}
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}

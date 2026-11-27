@@ -97,3 +97,31 @@ describe("schemas", () => {
     }
   });
 });
+
+describe("reward announcements", () => {
+  it("adds a reward to the announcement when a save completes a list", () => {
+    const three: ReadingList[] = [
+      {
+        ...lists[0]!,
+        readCount: 1,
+        total: 2,
+        books: [{ ...lists[0]!.books[0]!, read: true }, lists[0]!.books[1]!],
+      },
+    ];
+    const s = booksReducer(booksReducer(initialBooksState, { type: "load/success", lists: three }), {
+      type: "save/start",
+      bookId: "the-hobbit",
+      read: true,
+    });
+    const done = booksReducer(s, {
+      type: "save/success",
+      announcement: "The Hobbit marked as read. Fiction: 2 of 2 read.",
+      response: {
+        book: { ...three[0]!.books[1]!, read: true, updatedAt: "x" },
+        list: { id: "fiction", title: "Fiction", readCount: 2, total: 2 },
+      },
+    });
+    expect(done.announcement).toBe("The Hobbit marked as read. Fiction: 2 of 2 read. Reward unlocked: Fiction bookmark.");
+    expect(done.justUnlocked).toEqual(["fiction-bookmark"]);
+  });
+});

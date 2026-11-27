@@ -3,6 +3,8 @@ import { WelcomeVideo } from "@/components/WelcomeVideo";
 import { SamplePdf } from "@/components/SamplePdf";
 import { HeroImage } from "@/components/HeroImage";
 import { LIBRARY_NAME } from "@/lib/site";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { OfferBanner } from "@/components/OfferBanner";
 import styles from "./page.module.css";
 
 /**
@@ -15,16 +17,26 @@ export default function Home() {
       <a href="#lists" className="skip-link">
         Skip to reading lists
       </a>
+      <div className="bubbles" aria-hidden="true">
+        <span />
+        <span />
+        <span />
+        <span />
+      </div>
       <header className={styles.siteHeader}>
-        <div className={styles.inner}>
+        <div className={`glass ${styles.headerBar}`}>
           <p className={styles.brand}>
             <svg className={styles.brandMark} viewBox="0 0 32 32" aria-hidden="true" focusable="false">
-              <rect x="3" y="3" width="26" height="26" rx="7" fill="#1D1B16" />
-              <path d="M10 9h4v14h-4zM16 9.5l4-.9 3.1 13.7-4 .9z" fill="#F4A422" />
+              <rect x="3" y="3" width="26" height="26" rx="7" fill="currentColor" />
+              <path d="M10 9h4v14h-4z" fill="#F4A422" />
+              <path d="M16 9.5l4-.9 3.1 13.7-4 .9z" style={{ fill: "var(--bg)" }} />
             </svg>
             {LIBRARY_NAME}
           </p>
-          <p className={styles.season}>Winter reading challenge</p>
+          <div className={styles.headerEnd}>
+            <p className={styles.season}>Winter reading challenge</p>
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 
@@ -41,6 +53,8 @@ export default function Home() {
           </div>
           <HeroImage />
         </section>
+
+        <OfferBanner />
 
         <div id="lists" tabIndex={-1} className={styles.listsAnchor}>
           <ReadingChallenge />

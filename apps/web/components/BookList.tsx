@@ -18,7 +18,7 @@ export function BookList({ list, pending, errors, onToggle }: Props) {
   const complete = list.total > 0 && list.readCount === list.total;
 
   return (
-    <section className={styles.listCard} aria-labelledby={headingId} data-testid={`list-${list.id}`}>
+    <section className={`glass ${styles.listCard}`} aria-labelledby={headingId} data-testid={`list-${list.id}`}>
       <header className={styles.listHeader}>
         <h2 id={headingId} className={styles.listTitle}>
           {list.title}

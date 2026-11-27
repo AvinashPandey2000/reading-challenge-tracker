@@ -23,5 +23,4 @@ export const CATALOG: CatalogBook[] = [
   { id: "the-diary-of-a-young-girl", listId: "nonfiction", title: "The Diary of a Young Girl", author: "Anne Frank", position: 3 },
 ];
 
-/** The single demo reader shared by the web and Expo clients. */
-export const DEMO_READER_ID = "demo-reader";
+export { DEMO_READER_ID } from "@rct/shared";

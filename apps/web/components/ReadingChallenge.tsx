@@ -2,6 +2,7 @@
 
 import { useBooks } from "@/lib/useBooks";
 import { BookList } from "./BookList";
+import { Rewards } from "./Rewards";
 import styles from "./ReadingChallenge.module.css";
 
 export function ReadingChallenge() {
@@ -17,7 +18,7 @@ export function ReadingChallenge() {
         <div className={styles.lists} aria-busy="true" data-testid="lists-loading">
           <p className={styles.loadingText}>Loading your reading lists…</p>
           {["Fiction", "Nonfiction"].map((title) => (
-            <div key={title} className={`${styles.listCard} ${styles.skeletonCard}`} aria-hidden="true">
+            <div key={title} className={`glass ${styles.listCard} ${styles.skeletonCard}`} aria-hidden="true">
               <div className={styles.skeletonLine} style={{ width: "40%" }} />
               <div className={styles.skeletonLine} style={{ width: "25%" }} />
               {[0, 1, 2].map((i) => (
@@ -58,6 +59,7 @@ export function ReadingChallenge() {
               />
             ))}
           </div>
+          <Rewards lists={state.lists} justUnlocked={state.justUnlocked} />
         </>
       )}
     </div>

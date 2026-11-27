@@ -1,5 +1,6 @@
 import type { ReadingList, UpdateBookResponse } from "./schemas.js";
 import { saveErrorMessage } from "./format.js";
+import { computeRewards, newlyUnlocked, type RewardId } from "./rewards.js";
 
 /**
  * Framework-agnostic state for the reading lists, shared by the web and Expo clients.
@@ -31,6 +32,8 @@ export interface BooksState {
   announcement: string;
   /** bookId of the most recent successful save, used to trigger the checkmark transition once. */
   lastSavedId: string | null;
+  /** Rewards unlocked by the most recent successful save (for a brief highlight). */
+  justUnlocked: RewardId[];
 }
 
 export type BooksAction =
@@ -49,6 +52,7 @@ export const initialBooksState: BooksState = {
   loadError: null,
   announcement: "",
   lastSavedId: null,
+  justUnlocked: [],
 };
 
 export const LOAD_ERROR_MESSAGE = "Couldn't load your reading lists. Check your connection and try again.";
@@ -106,13 +110,21 @@ export function booksReducer(state: BooksState, action: BooksAction): BooksState
               books: list.books.map((b) => (b.id === book.id ? book : b)),
             },
       );
+      // Rewards are derived from confirmed lists; announce any that this save unlocked.
+      const before = computeRewards(state.lists, "");
+      const after = computeRewards(lists, "");
+      const unlockedTitles = newlyUnlocked(before, after);
+      const justUnlocked = after.filter((r) => unlockedTitles.includes(r.title)).map((r) => r.id);
       return {
         ...state,
         lists,
         pending: omit(state.pending, book.id),
         errors: omit(state.errors, book.id),
-        announcement: action.announcement,
+        announcement: unlockedTitles.length
+          ? `${action.announcement} Reward unlocked: ${unlockedTitles.join(", ")}.`
+          : action.announcement,
         lastSavedId: book.id,
+        justUnlocked,
       };
     }
     case "save/failure": {

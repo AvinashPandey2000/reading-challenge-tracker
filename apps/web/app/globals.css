@@ -1,22 +1,43 @@
+/*
+ * Theme: every token is defined once with light-dark(light, dark).
+ * <html data-theme="system|light|dark"> picks the colour-scheme; "system" follows the OS.
+ * The inline script in app/layout.tsx sets data-theme before first paint (no flash).
+ * Contrast for both palettes is checked by scripts/check-contrast.mjs.
+ */
 :root {
-  --bg: #fbf6ec;
-  --surface: #fffdf8;
-  --surface-sunk: #f4ecdc;
-  --ink: #1d1b16;
-  --ink-muted: #574f43;
-  --line: #e4d8c2;
-  --mango: #f4a422; /* decorative fills only */
-  --mango-strong: #a35400; /* mango used for text / meaningful graphics (>= 4.5:1 on ivory) */
-  --mango-bar: #c46a00; /* progress fill (>= 3:1 against the track) */
-  --green: #2f6b3a;
-  --green-soft: #e3efe2;
-  --danger: #a3261b;
-  --danger-soft: #fbe9e4;
-  --focus: #1d1b16;
+  color-scheme: light dark;
 
-  --radius: 14px;
-  --radius-sm: 10px;
-  --shadow: 0 1px 0 rgba(29, 27, 22, 0.04), 0 8px 24px -12px rgba(29, 27, 22, 0.18);
+  --bg: light-dark(#fbf6ec, #15130f);
+  --surface: light-dark(#fffdf8, #221e18);
+  --surface-sunk: light-dark(#f4ecdc, #2c271f);
+  --surface-hover: light-dark(#ffffff, #2a251e);
+  --ink: light-dark(#1d1b16, #f3ecdf);
+  --ink-muted: light-dark(#574f43, #c2b7a5);
+  --line: light-dark(#e4d8c2, #3a342a);
+  --mango: #f4a422; /* decorative fills only */
+  --mango-strong: light-dark(#a35400, #f2a541); /* mango text */
+  --mango-bar: light-dark(#c46a00, #e8932a); /* progress fill (>= 3:1 vs track) */
+  --saving-bg: light-dark(#fdf0da, #3a2a12);
+  --green: light-dark(#2f6b3a, #8fcb98);
+  --green-fill: light-dark(#2f6b3a, #4f9a5c); /* checkbox fill; white tick on top */
+  --green-soft: light-dark(#e3efe2, #1f3323);
+  --danger: light-dark(#a3261b, #ff9a8b);
+  --danger-soft: light-dark(#fbe9e4, #3d1d18);
+  --focus: light-dark(#1d1b16, #f3ecdf);
+  --on-ink: light-dark(#fffdf8, #15130f); /* text on ink-coloured buttons */
+  --video-bg: #111;
+
+  /* Glass ("liquid glass"-style translucent surfaces) */
+  --glass-bg: color-mix(in srgb, var(--surface) 74%, transparent);
+  --glass-border: light-dark(rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.12));
+  --glass-edge: light-dark(rgba(29, 27, 22, 0.08), rgba(0, 0, 0, 0.5));
+  --glass-highlight: light-dark(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.14));
+  --glass-shadow: light-dark(0 10px 30px -14px rgba(29, 27, 22, 0.28), 0 14px 36px -14px rgba(0, 0, 0, 0.7));
+  --bubble-opacity: light-dark(0.5, 0.32);
+
+  --radius: 18px;
+  --radius-sm: 12px;
+  --shadow: var(--glass-shadow);
 
   /* Material 3 motion tokens: short durations + standard easing */
   --dur-short: 180ms;
@@ -26,6 +47,12 @@
 
   --font-display-stack: var(--font-display), "Iowan Old Style", Georgia, serif;
   --font-body-stack: var(--font-body), system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 *,
@@ -40,6 +67,7 @@ html {
 
 body {
   margin: 0;
+  min-height: 100vh;
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font-body-stack);
@@ -75,9 +103,9 @@ button {
   position: absolute;
   left: 1rem;
   top: -100px;
-  z-index: 10;
+  z-index: 30;
   background: var(--ink);
-  color: var(--surface);
+  color: var(--on-ink);
   padding: 0.75rem 1rem;
   border-radius: var(--radius-sm);
   text-decoration: none;
@@ -85,6 +113,99 @@ button {
 }
 .skip-link:focus {
   top: 1rem;
+}
+
+/* ---------- Glass surfaces ---------- */
+.glass {
+  position: relative;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(22px) saturate(170%);
+  backdrop-filter: blur(22px) saturate(170%);
+  border: 1px solid var(--glass-border);
+  box-shadow:
+    inset 0 1px 0 var(--glass-highlight),
+    inset 0 0 0 1px var(--glass-edge),
+    var(--glass-shadow);
+  isolation: isolate;
+}
+/* Soft specular sheen across the top, like light on a glass bubble */
+.glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    light-dark(rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.07)) 0%,
+    transparent 38%
+  );
+  z-index: -1;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass {
+    background: var(--surface);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .glass {
+    background: var(--surface);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .bubbles {
+    display: none;
+  }
+}
+@media (prefers-contrast: more) {
+  .glass {
+    background: var(--surface);
+    border-color: var(--ink-muted);
+  }
+}
+
+/* ---------- Background bubbles (decorative, static) ---------- */
+.bubbles {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.bubbles span {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(40px);
+  opacity: var(--bubble-opacity);
+}
+.bubbles span:nth-child(1) {
+  width: 46vmax;
+  height: 46vmax;
+  top: -14vmax;
+  left: -12vmax;
+  background: radial-gradient(circle at 35% 35%, #ffc766, #f4a422 60%, transparent 70%);
+}
+.bubbles span:nth-child(2) {
+  width: 38vmax;
+  height: 38vmax;
+  top: 18vh;
+  right: -14vmax;
+  background: radial-gradient(circle at 40% 40%, #a9d8a8, #4f9a5c 60%, transparent 70%);
+}
+.bubbles span:nth-child(3) {
+  width: 34vmax;
+  height: 34vmax;
+  bottom: -16vmax;
+  left: 22vw;
+  background: radial-gradient(circle at 40% 40%, #f6b7a8, #e07a62 60%, transparent 70%);
+}
+.bubbles span:nth-child(4) {
+  width: 22vmax;
+  height: 22vmax;
+  top: 55vh;
+  left: -8vmax;
+  background: radial-gradient(circle at 40% 40%, #ffe1a6, #f4c062 60%, transparent 70%);
 }
 
 @media (prefers-reduced-motion: reduce) {

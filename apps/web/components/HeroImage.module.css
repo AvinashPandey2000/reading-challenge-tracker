@@ -10,6 +10,7 @@
   object-fit: cover;
   border-radius: var(--radius);
   box-shadow: var(--shadow);
+  border: 1px solid var(--glass-border);
   background: var(--surface-sunk);
 }
 /* On phones the photo would push the lists down, so it is shown only when there is room. */

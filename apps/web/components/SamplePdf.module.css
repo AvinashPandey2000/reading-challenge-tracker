@@ -1,5 +1,4 @@
 .card {
-  background: var(--surface-sunk);
   border-radius: var(--radius);
   padding: 1.25rem;
   display: grid;
@@ -27,7 +26,7 @@
   font-weight: 700;
 }
 .download:hover {
-  background: #fff;
+  background: var(--surface-hover);
 }
 .icon {
   width: 22px;

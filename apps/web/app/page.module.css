@@ -4,16 +4,28 @@
   padding: 0 1.25rem;
 }
 
+/* Floating glass header: stays visible while the page scrolls underneath it */
 .siteHeader {
-  border-bottom: 1px solid var(--line);
-  background: var(--bg);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  padding: 0.75rem 0.75rem 0;
 }
-.siteHeader .inner {
+.headerBar {
+  max-width: 1120px;
+  margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  min-height: 64px;
+  gap: 0.75rem;
+  min-height: 60px;
+  padding: 0.4rem 0.5rem 0.4rem 1rem;
+  border-radius: 999px;
+}
+.headerEnd {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 .brand {
   display: flex;
@@ -29,6 +41,7 @@
   height: 32px;
 }
 .season {
+  display: none;
   margin: 0;
   font-size: 0.875rem;
   font-weight: 600;
@@ -77,6 +90,12 @@
 }
 .footer p {
   margin: 0.25rem 0;
+}
+
+@media (min-width: 640px) {
+  .season {
+    display: block;
+  }
 }
 
 @media (min-width: 900px) {

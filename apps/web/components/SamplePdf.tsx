@@ -3,7 +3,7 @@ import styles from "./SamplePdf.module.css";
 
 export function SamplePdf() {
   return (
-    <section className={styles.card} aria-labelledby="sample-heading">
+    <section className={`glass ${styles.card}`} aria-labelledby="sample-heading">
       <h2 id="sample-heading" className={styles.heading}>
         Free sample to read
       </h2>

@@ -1,0 +1,103 @@
+.section {
+  display: grid;
+  gap: 0.75rem;
+}
+.heading {
+  font-size: 1.5rem;
+}
+.grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+@media (min-width: 760px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+.card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  gap: 0.25rem 0.85rem;
+  padding: 1rem;
+  border-radius: var(--radius);
+  transition: transform var(--dur-medium) var(--ease-standard), box-shadow var(--dur-medium) var(--ease-standard);
+}
+.card[data-just-unlocked] {
+  animation: unlock var(--dur-medium) var(--ease-emphasized-decel);
+}
+@keyframes unlock {
+  from {
+    transform: scale(0.97);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+.icon {
+  grid-row: span 2;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--surface-sunk);
+  color: var(--ink-muted);
+}
+.icon svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+}
+.card[data-unlocked] .icon {
+  background: radial-gradient(circle at 35% 30%, #ffd27a, var(--mango) 70%);
+  color: #1d1b16;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--mango) 25%, transparent);
+}
+.body {
+  display: grid;
+  gap: 0.15rem;
+}
+.title {
+  font-size: 1.05rem;
+}
+.description,
+.progress,
+.claim {
+  margin: 0;
+  font-size: 0.9rem;
+}
+.description {
+  color: var(--ink-muted);
+}
+.progress {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.claim {
+  margin-top: 0.35rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--radius-sm);
+  background: var(--green-soft);
+  color: var(--green);
+}
+.state {
+  grid-column: 2;
+  justify-self: start;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  background: var(--surface-sunk);
+  color: var(--ink-muted);
+}
+.card[data-unlocked] .state {
+  background: var(--green-soft);
+  color: var(--green);
+}

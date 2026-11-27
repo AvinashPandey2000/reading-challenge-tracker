@@ -1,6 +1,7 @@
 import Fastify, { type FastifyInstance, type FastifyServerOptions } from "fastify";
 import cors from "@fastify/cors";
-import { SaveVideoProgressBodySchema, UpdateBookBodySchema, savedAnnouncement } from "@rct/shared";
+import { SaveVideoProgressBodySchema, UpdateBookBodySchema, computeRewards, offerState, savedAnnouncement } from "@rct/shared";
+import { DEMO_READER_ID } from "./catalog.js";
 import { Store } from "./db.js";
 import { sendError } from "./errors.js";
 
@@ -88,6 +89,12 @@ export async function buildApp(opts: BuildAppOptions): Promise<FastifyInstance> 
       message: savedAnnouncement(result.book.title, result.book.read, result.list.title, result.list.readCount, result.list.total),
     };
   });
+
+  // Rewards are derived from saved progress with the same function both clients use.
+  app.get("/api/rewards", async () => ({
+    rewards: computeRewards(store.listBooks(), DEMO_READER_ID),
+    offer: offerState(),
+  }));
 
   app.get("/api/video-progress", async () => store.getVideoProgress());
 

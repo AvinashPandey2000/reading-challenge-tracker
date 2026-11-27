@@ -29,10 +29,7 @@
 }
 
 .listCard {
-  background: var(--surface);
-  border: 1px solid var(--line);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
   padding: 1.25rem 1.25rem 0.5rem;
 }
 
@@ -142,8 +139,8 @@
   transition: opacity var(--dur-short) var(--ease-standard), transform var(--dur-short) var(--ease-emphasized-decel);
 }
 .checkbox:checked + .bookLabel .box {
-  background: var(--green);
-  border-color: var(--green);
+  background: var(--green-fill);
+  border-color: var(--green-fill);
 }
 .checkbox:checked + .bookLabel .checkmark {
   opacity: 1;
@@ -185,7 +182,7 @@
 }
 .status[data-state="saving"] {
   color: var(--mango-strong);
-  background: #fdf0da;
+  background: var(--saving-bg);
 }
 
 .rowError {
@@ -215,7 +212,7 @@
   cursor: pointer;
 }
 .retryButton:hover {
-  background: #fff;
+  background: var(--surface-hover);
 }
 
 .primaryButton {
@@ -224,7 +221,7 @@
   border-radius: 999px;
   border: 0;
   background: var(--ink);
-  color: var(--surface);
+  color: var(--on-ink);
   font-weight: 700;
   cursor: pointer;
 }
